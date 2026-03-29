@@ -6,12 +6,20 @@ from skills import SKILLS
 from PyPDF2 import PdfReader
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import os
 
+# Load env
 load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Safety check
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL not set")
 
 app = FastAPI()
 
-# ✅ CORS
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,113 +28,94 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 🔌 DB connection
+# DB connection function
 def get_connection():
-    return psycopg2.connect(
-        host="localhost",
-        database="job_market",
-        user="postgres",
-        password="Mohnish@2006"
-    )
+    return psycopg2.connect(DATABASE_URL)
 
-# 🧠 Skill extraction
-def extract_skills(text: str):
-    if not text:
-        return []
-    text = text.lower()
-    return list(set([skill for skill in SKILLS if skill in text]))
 
-# 📄 PDF reader
-def extract_text_from_pdf(file):
+# Extract text from PDF
+def extract_text(file):
     reader = PdfReader(file)
     text = ""
     for page in reader.pages:
-        text += page.extract_text() or ""
-    return text
+        if page.extract_text():
+            text += page.extract_text()
+    return text.lower()
 
-# 🧠 Skill match
-def skill_match_score(user_skills, job_skills):
-    if not user_skills:
-        return 0
-    matches = 0
-    for us in user_skills:
-        for js in job_skills:
-            if us in js or js in us:
-                matches += 1
-                break
-    return matches / len(user_skills)
 
-# 🚀 MAIN API
+# Extract skills from resume
+def extract_skills(text):
+    found = []
+    for skill in SKILLS:
+        if skill in text:
+            found.append(skill)
+    return found
+
+
+# Calculate match
+def calculate_match(resume_text, job_text):
+    vectorizer = TfidfVectorizer()
+    vectors = vectorizer.fit_transform([resume_text, job_text])
+    score = cosine_similarity(vectors[0:1], vectors[1:2])[0][0]
+    return round(score, 2)
+
+
 @app.post("/upload-resume")
 async def upload_resume(file: UploadFile = File(...)):
+    try:
+        # Read PDF
+        contents = await file.read()
+        with open("temp.pdf", "wb") as f:
+            f.write(contents)
 
-    resume_text = extract_text_from_pdf(file.file)
-    user_skills = extract_skills(resume_text)
+        resume_text = extract_text("temp.pdf")
+        resume_skills = extract_skills(resume_text)
 
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT title, company, location, description, created_at FROM jobs")
-    rows = cur.fetchall()
-    cur.close()
-    conn.close()
+        # DB fetch
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    job_descriptions = [row[3] for row in rows]
-    corpus = [resume_text] + job_descriptions
+        cursor.execute("SELECT id, title, company, location, description FROM jobs")
+        jobs = cursor.fetchall()
 
-    vectorizer = TfidfVectorizer(stop_words="english")
-    vectors = vectorizer.fit_transform(corpus)
+        results = []
 
-    similarity_scores = cosine_similarity(vectors[0:1], vectors[1:]).flatten()
+        for job in jobs:
+            job_id, title, company, location, description = job
 
-    result = []
+            job_text = description.lower()
 
-    for i, row in enumerate(rows):
-        job_skills = extract_skills(row[3])
+            match_score = calculate_match(resume_text, job_text)
 
-        # 🔥 FIXED missing skills logic
-        missing_skills = []
-        for js in job_skills:
-            found = False
-            for us in user_skills:
-                if js in us or us in js:
-                    found = True
-                    break
-            if not found:
-                missing_skills.append(js)
+            # Skill match
+            job_skills = extract_skills(job_text)
+            matched_skills = list(set(resume_skills) & set(job_skills))
+            missing_skills = list(set(job_skills) - set(resume_skills))
 
-        tfidf_score = float(similarity_scores[i])
-        skill_score = skill_match_score(user_skills, job_skills)
+            skill_score = len(matched_skills) / (len(job_skills) + 1)
 
-        # 🎯 current score
-        final_score = (0.5 * tfidf_score) + (0.5 * skill_score)
-        if skill_score == 1:
-            final_score += 0.1
+            # Simulated improved score
+            improved_score = round(min(match_score + 0.15, 1), 2)
 
-        # 🔮 projected score
-        future_user_skills = user_skills + missing_skills[:3]
-        future_skill_score = skill_match_score(future_user_skills, job_skills)
+            results.append({
+                "id": job_id,
+                "title": title,
+                "company": company,
+                "location": location,
+                "match_score": match_score,
+                "skill_score": round(skill_score, 2),
+                "skills": job_skills,
+                "missing_skills": missing_skills,
+                "improved_score": improved_score
+            })
 
-        projected_score = (0.5 * tfidf_score) + (0.5 * future_skill_score)
-        if future_skill_score == 1:
-            projected_score += 0.1
+        cursor.close()
+        conn.close()
 
-        result.append({
-            "title": row[0],
-            "company": row[1],
-            "location": row[2],
-            "skills": job_skills,
-            "missing_skills": missing_skills[:3],
-            "match_score": round(final_score, 2),
-            "projected_score": round(projected_score, 2),
-            "tfidf_score": round(tfidf_score, 2),
-            "skill_score": round(skill_score, 2),
-            "created_at": row[4]
-        })
+        # Sort best first
+        results = sorted(results, key=lambda x: x["match_score"], reverse=True)
 
-    result.sort(key=lambda x: x["match_score"], reverse=True)
-    result = result[:5]
+        return {"jobs": results}
 
-    return {
-        "extracted_skills": user_skills,
-        "jobs": result
-    }
+    except Exception as e:
+        return {"error": str(e)}
