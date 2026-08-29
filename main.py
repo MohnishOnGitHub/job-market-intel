@@ -92,10 +92,17 @@ async def upload_resume(file: UploadFile = File(...)):
             matched_skills = list(set(resume_skills) & set(job_skills))
             missing_skills = list(set(job_skills) - set(resume_skills))
 
-            skill_score = len(matched_skills) / (len(job_skills) + 1)
+            skill_score = (
+                len(matched_skills) / len(job_skills)
+                if job_skills
+                else 0
+            )
 
-            # Simulated improved score
-            improved_score = round(min(match_score + 0.15, 1), 2)
+            hybrid_score = round(
+                0.7 * match_score +
+                0.3 * skill_score,
+                3
+            )
 
             results.append({
                 "id": job_id,
@@ -106,14 +113,14 @@ async def upload_resume(file: UploadFile = File(...)):
                 "skill_score": round(skill_score, 2),
                 "skills": job_skills,
                 "missing_skills": missing_skills,
-                "improved_score": improved_score
+                "hybrid_score": hybrid_score
             })
 
         cursor.close()
         conn.close()
 
         # Sort best first
-        results = sorted(results, key=lambda x: x["match_score"], reverse=True)
+        results = sorted(results, key=lambda x: x["hybrid_score"], reverse=True)
 
         return {"jobs": results}
 
