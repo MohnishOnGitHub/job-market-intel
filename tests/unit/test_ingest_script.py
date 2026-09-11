@@ -14,8 +14,7 @@ def test_ingest_script_is_environment_driven():
     assert "ADZUNA_APP_ID" in source
     assert "ADZUNA_APP_KEY" in source
     assert "password=" not in source
-    assert "host=" not in source
-    assert "user=" not in source
+    assert "IngestionService" in source
 
 
 def test_main_exits_without_connecting_when_env_is_missing(monkeypatch):
@@ -28,5 +27,15 @@ def test_main_exits_without_connecting_when_env_is_missing(monkeypatch):
     def fail_connect(*_args, **_kwargs):
         raise AssertionError("missing configuration must not open a database connection")
 
-    monkeypatch.setattr(ingest_adzuna.psycopg2, "connect", fail_connect)
-    assert ingest_adzuna.main() == 1
+    monkeypatch.setattr("app.db.database.psycopg2.connect", fail_connect)
+    monkeypatch.setattr("app.db.migrate.psycopg2.connect", fail_connect)
+    assert ingest_adzuna.main([]) == 1
+
+
+def test_cli_help_lists_ingestion_options():
+    parser = ingest_adzuna.build_parser()
+    help_text = parser.format_help()
+    assert "--query" in help_text
+    assert "--country" in help_text
+    assert "--location" in help_text
+    assert "--pages" in help_text

@@ -7,12 +7,23 @@ from functools import lru_cache
 from dotenv import load_dotenv
 
 
+def _optional_env(name: str) -> str | None:
+    value = os.getenv(name)
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
+
+
 @dataclass(frozen=True)
 class Settings:
     database_url: str | None
     app_env: str
     log_level: str
     max_upload_mb: int
+    adzuna_app_id: str | None
+    adzuna_app_key: str | None
+    adzuna_country: str
 
     @classmethod
     def from_env(cls) -> Settings:
@@ -29,11 +40,16 @@ class Settings:
         if database_url is not None:
             database_url = database_url.strip() or None
 
+        country = (os.getenv("ADZUNA_COUNTRY") or "in").strip().lower() or "in"
+
         return cls(
             database_url=database_url,
             app_env=os.getenv("APP_ENV", "development"),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             max_upload_mb=max_upload_mb,
+            adzuna_app_id=_optional_env("ADZUNA_APP_ID") or _optional_env("APP_ID"),
+            adzuna_app_key=_optional_env("ADZUNA_APP_KEY") or _optional_env("APP_KEY"),
+            adzuna_country=country,
         )
 
     @property

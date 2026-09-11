@@ -28,3 +28,17 @@ class ResumeParseError(AppError):
 class DatabaseUnavailableError(AppError):
     def __init__(self, message: str = "Database is not configured or unavailable.") -> None:
         super().__init__(message, 503)
+
+
+class JobValidationError(Exception):
+    """A single job record is invalid and should be skipped."""
+
+
+class JobSourceError(AppError):
+    def __init__(self, message: str = "Job source request failed.") -> None:
+        super().__init__(message, 502)
+
+
+class IngestionError(AppError):
+    def __init__(self, message: str = "Ingestion failed.") -> None:
+        super().__init__(message, 500)
