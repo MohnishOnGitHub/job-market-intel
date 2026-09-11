@@ -5,7 +5,11 @@ from app.evaluation.runner import component_coverage, evaluate_dataset
 from app.evaluation.v1_authoring import build_v1_dataset
 
 
-def test_evaluation_runs_lightweight_methods_on_fixture():
+def test_evaluation_runs_lightweight_methods_on_fixture(monkeypatch):
+    monkeypatch.setattr(
+        "app.evaluation.runner.try_sentence_transformer",
+        lambda *_args, **_kwargs: (None, "forced skip for lightweight unit test"),
+    )
     dataset = build_v1_dataset()
     payload = evaluate_dataset(
         dataset,

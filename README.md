@@ -1,70 +1,76 @@
 # Job Market Intel
 
-A job-market intelligence app: ingest Adzuna postings, measure skill demand in SQL, and rank jobs against a résumé with explainable scores.
+Ingest job postings, measure skill demand in SQL, and rank a résumé with explainable lexical and semantic scores.
+
+## Demo
+
+The UI is screenshot-ready at:
+
+1. `http://127.0.0.1:8000/` — market overview cards
+2. same page, Skill demand — table + Chart.js bars
+3. `/match.html` — ranked match cards
+4. a result card — component bars and expandable weights
+
+This repository does not include generated screenshot files. Use a local database (evaluation fixtures or Adzuna) so the numbers are real.
 
 ## What it does
 
-1. **Market intelligence** — active jobs, skill demand, category mix, experience, locations, companies, and posting age.
-2. **Résumé matching** — upload a PDF and compare the pairwise TF-IDF baseline with a structured hybrid ranker.
-3. **Evaluation** — a committed 256-judgment fixture reports directional ranking quality.
-
-Open http://127.0.0.1:8000 after ingesting jobs. The UI uses same-origin APIs.
+- **Market intelligence** — active jobs, skill demand, categories, experience mix, locations, companies, posting age
+- **Résumé matching** — pairwise TF-IDF baseline and a structured hybrid ranker
+- **Evaluation** — 256 labeled judgments, including measured MiniLM results
 
 ## Architecture
 
-```text
-Adzuna → normalize → dedupe → PostgreSQL jobs
-       → job_skills (taxonomy)
-       → job_embeddings (optional pgvector)
+```mermaid
+flowchart LR
+  Adzuna --> Ingest[Normalize and dedupe]
+  Ingest --> PG[(PostgreSQL)]
+  PG --> Enrich[Skill enrichment]
+  Enrich --> PG
+  PG --> MiniLM[MiniLM embeddings]
+  MiniLM --> Vectors[pgvector]
 
-Browser
-  Market  → /api/v1/analytics/*
-  Match   → POST /upload-resume  or  POST /api/v1/matches/upload
-  Eval    → static measured Phase 5 numbers
+  Resume[Résumé PDF] --> Parse[Parse and extract skills]
+  Parse --> MiniLM
+  MiniLM --> Retrieve[pgvector retrieval]
+  Retrieve --> Hybrid[Structured hybrid ranker]
+  Hybrid --> API[FastAPI]
+
+  PG --> Analytics[SQL analytics]
+  Analytics --> Dash[Dashboard]
+  API --> Dash
 ```
 
-hashing-v1 is **lexical hashing retrieval**. sentence-transformers, when installed, are **semantic embeddings**. Hybrid is a **structured weighted ranker**. TF-IDF is the **pairwise lexical baseline**.
-
-## Demo / screenshots
-
-The dashboard is laid out for four later screenshots: market overview, skill-demand table/chart, résumé results, and score breakdown. This repository does not include generated screenshots.
+hashing-v1 is **lexical hashing retrieval**. `all-MiniLM-L6-v2` is **semantic embeddings**. Hybrid is a **structured weighted ranker**. TF-IDF is the **pairwise lexical baseline**.
 
 ## Market intelligence
 
-Filters: title contains, location contains, optional stored experience level.
+SQL aggregates over `active = TRUE` jobs. Filters are conservative `ILIKE` contains matches.
 
-| View | Meaning |
-|---|---|
-| Active jobs | Filtered `active = TRUE` rows |
-| Jobs with skill data | Active jobs with ≥1 `job_skills` row |
-| Skill share | Jobs containing the skill / filtered active jobs |
-| Categories | Jobs with ≥1 skill in that category |
-| Experience | Stored `experience_level` only; blanks are `unknown` |
-| Locations | `COALESCE(location_normalized, location_raw)` strings, not geocodes |
-| Freshness | `posted_at` age buckets, including unknown |
-
-Definitions: `docs/METRICS.md`. No growth or forecast claims.
+Definitions: `docs/METRICS.md`. No growth or forecast claims. Locations are stored strings, not geocodes.
 
 ## Résumé matching
 
-- **Pairwise TF-IDF baseline** — `POST /upload-resume`
-- **Lexical vector + structured hybrid** — default hashing-v1 via `POST /api/v1/matches/upload`
-- **Semantic + structured hybrid** — only if `EMBEDDING_PROVIDER=sentence-transformers`
+| Mode | Endpoint | What it is |
+|---|---|---|
+| Pairwise TF-IDF baseline | `POST /upload-resume` | Two-document TF-IDF + skill overlap |
+| Lexical vector + structured hybrid | `POST /api/v1/matches` with hashing-v1 | Default in Docker/CI |
+| Semantic + structured hybrid | same API with MiniLM | Optional extra |
 
-Cards show match score, method, matched/missing skills, and component bars. Unused location or experience preferences display as **N/A**, not 0. The score is not a hiring probability. The PDF is parsed in memory and not stored.
+The overall value is a **match score**, not a hiring probability. Unused location or experience preferences display as **N/A**. The PDF is parsed in memory and not stored.
 
-## Ranking systems
+## Ranking architecture
 
 ```text
-TF-IDF:  0.7 * pairwise cosine + 0.3 * skill overlap
-Hybrid:  0.50 * similarity + 0.25 * skills + 0.10 * experience + 0.10 * recency + 0.05 * location
+TF-IDF:   0.7 * pairwise cosine + 0.3 * skill overlap
+Hybrid:   0.50 * similarity + 0.25 * skills + 0.10 * experience + 0.10 * recency + 0.05 * location
 ```
 
-Hybrid weights renormalize when a preference is omitted. These weights are DESIGN defaults, not a tuned production optimum.
+DESIGN hybrid weights renormalize when a preference is omitted. They are defaults, not a tuned production optimum.
 
 ## Evaluation
 
-v1 fixture: **8 synthetic profiles × 32 jobs = 256 judgments**. Directional benchmark; not statistically significant.
+v1 fixture: **8 synthetic profiles × 32 jobs = 256 judgments**. Directional; not statistically significant.
 
 Held-out test (3 profiles):
 
@@ -73,11 +79,15 @@ Held-out test (3 profiles):
 | Skill overlap | 0.467 | 0.589 | 0.586 | 0.778 |
 | Pairwise TF-IDF | 0.533 | 0.783 | 0.757 | 1.000 |
 | hashing-v1 (lexical) | 0.533 | 0.633 | 0.691 | 1.000 |
+| MiniLM semantic | 0.667 | 0.811 | 0.833 | 1.000 |
 | Hybrid (DESIGN + hashing-v1) | 0.600 | 0.933 | 0.852 | 1.000 |
+| Hybrid (DESIGN + MiniLM) | 0.667 | 0.878 | 0.892 | 1.000 |
 
-On validation, TF-IDF NDCG@10 was 0.685 vs hybrid 0.677. Sentence-transformer evaluation was **not run**. Production weights were not changed. See `/evaluation.html` and `docs/EVALUATION.md`.
+Validation NDCG@10: MiniLM-only 0.769, TF-IDF 0.685, MiniLM hybrid 0.713, hashing hybrid 0.677. Production weights were not changed. See `/evaluation.html` and `docs/EVALUATION.md`.
 
-## Data pipeline
+## Data engineering
+
+Adzuna adapter → validate → normalize → content-hash dedupe → PostgreSQL upsert → `ingestion_runs`. Predicted Adzuna salaries are discarded. Jobs are not auto-deactivated when missing from one page.
 
 ```bash
 python scripts/migrate.py
@@ -87,65 +97,80 @@ python scripts/enrich_job_skills.py --only-missing
 python scripts/generate_embeddings.py --only-missing
 ```
 
-Adzuna is the only source. One request is not the whole market. Jobs are not auto-deactivated when missing from a single page.
+Without Adzuna keys, load the synthetic fixture for a local demo:
+
+```bash
+python scripts/load_evaluation_jobs.py
+python scripts/enrich_job_skills.py --all
+```
 
 ## Skill intelligence
 
-`data/taxonomy/skills.yml` is the source of truth (~160 technical skills). Extraction is deterministic and alias-aware. `sql` inside `postgresql` does not count as SQL.
+`data/taxonomy/skills.yml` is the source of truth: **160** canonical technical skills, 252 aliases, 13 categories. Extraction is deterministic. `sql` inside `postgresql` does not count as SQL.
 
 ## API
 
-Documented in `/docs`. Implemented endpoints include:
+Documented at `/docs`. Implemented endpoints include `/health`, `/jobs`, `/jobs/{id}`, `/api/v1/skills`, `/api/v1/ranking/status`, `/api/v1/analytics/*`, `POST /upload-resume`, `POST /api/v1/matches`.
 
-- `GET /health`
-- `GET /jobs`, `GET /jobs/{id}`
-- `GET /api/v1/skills`
-- `GET /api/v1/ranking/status`
-- `GET /api/v1/analytics/overview`
-- `GET /api/v1/analytics/skills`
-- `GET /api/v1/analytics/categories`
-- `GET /api/v1/analytics/experience`
-- `GET /api/v1/analytics/locations`
-- `GET /api/v1/analytics/companies`
-- `GET /api/v1/analytics/freshness`
-- `POST /upload-resume`
-- `POST /api/v1/matches`, `POST /api/v1/matches/upload`
+## Local setup
 
-## Run locally
+Supported Python: **3.10+** (`runtime.txt` = 3.10.13). Unit tests also run on 3.9.
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # DATABASE_URL and optional Adzuna keys
+cp .env.example .env
+docker compose up -d postgres
 python scripts/migrate.py
 python scripts/sync_skills.py
 uvicorn app.main:app --reload
 ```
 
-Python 3.10+ recommended. PostgreSQL needs pgvector for stored embeddings. Charts use Chart.js 4.4.1 from jsDelivr.
-
-## Tests
+Optional MiniLM (large download; not in the Docker image):
 
 ```bash
+pip install -r requirements-semantic.txt
+# EMBEDDING_PROVIDER=sentence-transformers
+```
+
+## Docker
+
+```bash
+docker compose up --build
+docker compose exec app python scripts/migrate.py
+docker compose exec app python scripts/sync_skills.py
+```
+
+The app image is a slim **Python 3.10.13** FastAPI container (~600 MB). It does **not** install torch / sentence-transformers. Default ranking is hashing-v1. Compose Postgres is `pgvector/pgvector:pg16` on host port **5433** with development placeholders `jmi` / `jmi_dev_only`.
+
+## Testing
+
+```bash
+export TEST_DATABASE_URL=postgresql://jmi:jmi_dev_only@localhost:5433/job_market_test
 pytest
 ```
 
-Repository tests skip without `TEST_DATABASE_URL` or a ready Docker daemon.
+Without `TEST_DATABASE_URL` or Docker, PostgreSQL tests skip. They are not counted as passes.
+
+## CI
+
+GitHub Actions installs dependencies, starts `pgvector/pgvector:pg16`, migrates, and runs the full suite. Adzuna keys and MiniLM downloads are not required.
 
 ## Limitations
 
-- hashing-v1 is not a semantic model.
-- Hybrid defaults are unevaluated for production changes.
-- Location strings are not geocoded.
-- Experience is not inferred from prose.
-- No historical skill-growth claims.
-- No Docker Compose app stack or CI yet.
-- A past commit leaked a database password in git history; rotate it outside git.
+- hashing-v1 is not semantic
+- MiniLM is optional and not in the default image
+- Hybrid DESIGN weights are unevaluated for a production change
+- Location strings are not geocoded
+- Experience is not inferred from prose
+- No historical skill-growth claims
+- One Adzuna query is not the whole market
+- A past commit leaked a database password in git history; rotate it outside git
 
-## Roadmap
+## Future work
 
-Possible later work: historical trends, a larger labeled set, optional sentence-transformer evaluation, Docker/CI. Not in this phase: LLM ranking, new job boards, Kafka/Redis.
+Historical trends, a larger labeled set, optional default MiniLM in a separate fat image. Not planned here: LLM ranking, new job boards, Kafka/Redis.
 
 ## Documents
 
@@ -155,7 +180,7 @@ Possible later work: historical trends, a larger labeled set, optional sentence-
 | `docs/DESIGN.md` | Target architecture |
 | `docs/METRICS.md` | Dashboard metric definitions |
 | `docs/EVALUATION.md` | Ranking evaluation report |
-| `docs/PHASE_6_SUMMARY.md` | This phase |
+| `docs/PHASE_7_SUMMARY.md` | Packaging and validation |
 
 ## Author
 

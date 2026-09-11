@@ -45,8 +45,8 @@ Author rubric on role family and seniority, plus documented overrides (clinical 
 | skills | Canonical skill-overlap ratio only |
 | tfidf | Pairwise TF-IDF cosine only (not the 0.7/0.3 upload-resume mix) |
 | hashing | hashing-v1 cosine: **lexical hashing retrieval**, not semantic |
-| semantic | sentence-transformer cosine | **NOT RUN** |
-| hybrid | Phase 4 DESIGN weights + hashing-v1 embedding component |
+| semantic | sentence-transformer cosine (`all-MiniLM-L6-v2`, Phase 7) |
+| hybrid | Phase 4 DESIGN weights; embedding slot is hashing-v1 unless MiniLM is configured |
 
 The production hybrid ranker’s embedding slot defaults to hashing-v1. This report therefore does **not** call that hybrid “semantic hybrid.”
 
@@ -58,7 +58,7 @@ Primary table: **held-out test (3 queries)**.
 
 ## Retrieval Recall
 
-Live pgvector SQL retrieval: **NOT RUN** (no PostgreSQL in this evaluation pass).
+Live pgvector SQL retrieval was run in Phase 7 on stored MiniLM vectors. See the Phase 7 table below.
 
 In-memory cosine top-N on the 32 labeled jobs, hashing-v1, test split:
 
@@ -68,7 +68,18 @@ In-memory cosine top-N on the 32 labeled jobs, hashing-v1, test split:
 | 50 | 1.000 |
 | 100 | 1.000 |
 
-The fixture has only 32 jobs, so N=50 and N=100 include the entire pool. Sentence-transformer retrieval: **NOT RUN**.
+The fixture has only 32 jobs, so N=50 and N=100 include the entire pool.
+
+Phase 7 in-memory MiniLM cosine (test): Recall@20 = 1.000. Validation: Recall@20 = 0.931.
+
+Phase 7 live PostgreSQL pgvector (`sentence-transformers:all-MiniLM-L6-v2`, 32 stored vectors):
+
+| Split | Recall@20 | Recall@50 | Recall@100 |
+|---|---|---|---|
+| test | 1.000 | 1.000 | 1.000 |
+| validation | 0.931 | 1.000 | 1.000 |
+
+Sample match metadata: `retrieval = pgvector`. This is not the in-memory ranker.
 
 ## Aggregate Results
 
@@ -79,8 +90,9 @@ Held-out **test** (3 profiles):
 | skills | 0.467 | 0.589 | 0.586 | 0.778 |
 | tfidf | 0.533 | 0.783 | 0.757 | 1.000 |
 | hashing-v1 (lexical) | 0.533 | 0.633 | 0.691 | 1.000 |
-| semantic (sentence-transformer) | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| semantic (`all-MiniLM-L6-v2`) | 0.667 | 0.811 | 0.833 | 1.000 |
 | hybrid (DESIGN + hashing-v1) | 0.600 | 0.933 | 0.852 | 1.000 |
+| hybrid (DESIGN + MiniLM) | 0.667 | 0.878 | 0.892 | 1.000 |
 
 **Validation** (5 profiles) does not agree on the winner:
 
@@ -89,9 +101,11 @@ Held-out **test** (3 profiles):
 | skills | 0.320 | 0.612 | 0.551 | 0.850 |
 | tfidf | 0.520 | 0.634 | 0.685 | 1.000 |
 | hashing-v1 (lexical) | 0.480 | 0.629 | 0.663 | 1.000 |
+| semantic (`all-MiniLM-L6-v2`) | 0.560 | 0.767 | 0.769 | 1.000 |
 | hybrid (DESIGN + hashing-v1) | 0.440 | 0.589 | 0.677 | 1.000 |
+| hybrid (DESIGN + MiniLM) | 0.520 | 0.629 | 0.713 | 1.000 |
 
-On validation, pairwise TF-IDF has the highest NDCG@10. Hybrid is slightly behind. This is why the study is labeled directional.
+On the Phase 5 hashing-only comparison, validation favored pairwise TF-IDF over hashing hybrid. After Phase 7, MiniLM-only NDCG@10 (0.769) is highest on validation. Structured hybrid around MiniLM then drops to 0.713. The study remains directional.
 
 All eight queries together: TF-IDF P@5 0.525 / NDCG@10 0.712; hybrid P@5 0.500 / NDCG@10 0.742.
 
@@ -118,7 +132,16 @@ Test split, hashing-v1 as the embedding component, DESIGN weight proportions the
 | hashing + skills + recency | 0.467 | 0.717 | 0.713 | 1.000 |
 | full hybrid (hashing + skills + recency + experience + location) | 0.600 | 0.933 | 0.852 | 1.000 |
 
-Sentence-transformer ablations: **NOT RUN**.
+Phase 7 MiniLM ablations, same DESIGN proportions, test split:
+
+| Combination | P@5 | R@10 | NDCG@10 | MRR |
+|---|---|---|---|---|
+| semantic only | 0.667 | 0.811 | 0.833 | 1.000 |
+| semantic + skills | 0.600 | 0.811 | 0.843 | 1.000 |
+| semantic + skills + recency | 0.533 | 0.728 | 0.806 | 1.000 |
+| full hybrid (MiniLM + skills + recency + experience + location) | 0.667 | 0.878 | 0.892 | 1.000 |
+
+Recency again lowered NDCG@10 before location/experience recovered the full hybrid. Production weights were not changed.
 
 Adding skills to hashing improved recall. Adding recency then *lowered* NDCG@10 on this fixture (new but weak intern/clinical posts). Experience and location recovered the full hybrid score on the test profiles, which all have preferences.
 
@@ -152,8 +175,8 @@ Examples from the test split. The system was not changed in response.
 - Eight synthetic queries, three of them held out. Directional only.
 - Complete judgments on 32 jobs, not a live market snapshot.
 - hashing-v1 is a lexical hashed-token vector. It is not a sentence embedding.
-- sentence-transformers was not installed; semantic numbers were not fabricated.
-- pgvector was not queried.
+- sentence-transformers 3.1.1 + torch 2.8.0 + `all-MiniLM-L6-v2` (384-d, cosine, `normalize_embeddings=True`) were run in Phase 7.
+- Live pgvector recall was measured on the 32 fixture jobs after storing MiniLM vectors.
 - Authoring used a role-family rubric. That is independent of model scores but is still one labeler’s rule, not a multi-recruiter panel.
 - Optional weight search used five validation queries. That is too small to adopt new defaults.
 
@@ -169,4 +192,12 @@ Optional (does not change production weights):
 python scripts/evaluate_ranking.py --split test --tune
 ```
 
-To run the sentence-transformer method, install `sentence-transformers` and a local `all-MiniLM-L6-v2` cache, then re-run with `--methods skills,tfidf,hashing,semantic,hybrid`. If the model is missing, the CLI prints `NOT RUN` instead of substituting hashing-v1.
+Phase 7 MiniLM + pgvector:
+
+```bash
+pip install -r requirements-semantic.txt
+EMBEDDING_PROVIDER=sentence-transformers python scripts/evaluate_ranking.py --split test --output artifacts/evaluation/phase7/test
+EMBEDDING_PROVIDER=sentence-transformers python scripts/evaluate_pgvector.py --split test
+```
+
+If sentence-transformers is missing, the CLI still prints `NOT RUN` for the semantic method instead of substituting hashing-v1.

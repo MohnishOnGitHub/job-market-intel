@@ -12,4 +12,5 @@ dist/
 build/
 temp.pdf
 .cache/
+.huggingface/
 *.pt

@@ -8,7 +8,10 @@ SCRIPT = Path(__file__).resolve().parents[2] / "scripts" / "generate_embeddings.
 
 
 def test_generate_embeddings_script_requires_database_url(monkeypatch):
-    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.setattr(
+        "scripts.generate_embeddings.get_settings",
+        lambda: type("Settings", (), {"database_url": None})(),
+    )
 
     def fail_connect(*_args, **_kwargs):
         raise AssertionError("missing configuration must not open a database connection")

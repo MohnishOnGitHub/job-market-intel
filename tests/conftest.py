@@ -12,6 +12,7 @@ def _isolate_settings(monkeypatch):
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("LOG_LEVEL", "WARNING")
     monkeypatch.setenv("MAX_UPLOAD_MB", "5")
+    monkeypatch.setattr("app.core.config.load_dotenv", lambda *args, **kwargs: None)
     monkeypatch.delenv("DATABASE_URL", raising=False)
     clear_settings_cache()
     yield

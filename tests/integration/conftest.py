@@ -97,8 +97,14 @@ def migrated_db(postgres_url, monkeypatch):
     apply_migrations(conn)
     conn.autocommit = True
     with conn.cursor() as cursor:
-        cursor.execute("TRUNCATE ingestion_runs RESTART IDENTITY CASCADE")
-        cursor.execute("TRUNCATE jobs RESTART IDENTITY CASCADE")
+        cursor.execute(
+            """
+            TRUNCATE job_embeddings, job_skills, jobs, ingestion_runs,
+                     skill_aliases, skills, schema_migrations
+            RESTART IDENTITY CASCADE
+            """
+        )
+    apply_migrations(conn)
     yield conn
     conn.close()
     clear_settings_cache()

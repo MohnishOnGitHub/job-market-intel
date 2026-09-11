@@ -1,0 +1,6 @@
+# Optional semantic embeddings. Not used by CI or the default Docker image.
+# Install in a local venv only when you want MiniLM:
+#   pip install -r requirements-semantic.txt
+#
+# Expected model: all-MiniLM-L6-v2 (384-d, cosine, normalize_embeddings=True)
+sentence-transformers>=3.0.0,<3.2.0

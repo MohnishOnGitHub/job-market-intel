@@ -1,0 +1,28 @@
+{
+  "kind": "postgresql_pgvector",
+  "split": "validation",
+  "provider": "sentence-transformers:all-MiniLM-L6-v2",
+  "stored_vectors": 32,
+  "evaluation_jobs": 32,
+  "note": "Recall is measured with SQL ORDER BY embedding <=> query on active evaluation jobs only. This is not the in-memory fixture ranker.",
+  "cutoffs": {
+    "20": {
+      "mean": 0.9314285714285715
+    },
+    "50": {
+      "mean": 1.0
+    },
+    "100": {
+      "mean": 1.0
+    }
+  },
+  "sample_match": {
+    "resume_id": "r_da_junior",
+    "retrieval": "pgvector",
+    "embedding_model": "sentence-transformers:all-MiniLM-L6-v2",
+    "ranking": "hybrid",
+    "candidate_count": 20,
+    "top_job_id": 3
+  },
+  "pgvector_used": true
+}
