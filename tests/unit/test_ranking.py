@@ -7,8 +7,22 @@ from app.services.ranking import (
     compute_hybrid_score,
     pairwise_tfidf_score,
     rank_jobs,
+    rank_tfidf,
 )
 from app.services.skill_extractor import compute_skill_score
+
+
+def test_rank_tfidf_is_an_independent_lexical_baseline():
+    jobs = [
+        Job(
+            id=1,
+            title="Role",
+            company="Co",
+            location="X",
+            description="python sql pandas",
+        )
+    ]
+    assert rank_tfidf("python sql", jobs) == rank_jobs("python sql", jobs)
 
 
 def test_hybrid_formula_is_preserved():

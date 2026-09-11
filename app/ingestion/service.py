@@ -5,7 +5,10 @@ from datetime import datetime, timezone
 from typing import Callable, Optional
 
 from app.core.exceptions import DatabaseUnavailableError, JobSourceError, JobValidationError
+from app.schemas.job import Job
+from app.services.job_embeddings import JobEmbeddingService
 from app.services.skill_enrichment import SkillEnrichmentService
+from app.services.skill_extractor import extract_skills
 from app.db.repositories.ingestion_runs import IngestionRunRepository
 from app.db.repositories.jobs import (
     UPSERT_INSERTED,
@@ -27,11 +30,13 @@ class IngestionService:
         run_repository: IngestionRunRepository,
         now_fn: Optional[Callable[[], datetime]] = None,
         enrichment_service: Optional[SkillEnrichmentService] = None,
+        embedding_service: Optional[JobEmbeddingService] = None,
     ) -> None:
         self.job_repository = job_repository
         self.run_repository = run_repository
         self.now_fn = now_fn or (lambda: datetime.now(timezone.utc))
         self.enrichment_service = enrichment_service
+        self.embedding_service = embedding_service
 
     def run(self, source: JobSource) -> IngestionCounts:
         source_name = getattr(source, "name", "unknown")
@@ -121,19 +126,42 @@ class IngestionService:
             counts.records_failed += 1
             return
 
-        if (
-            self.enrichment_service
-            and outcome in {UPSERT_INSERTED, UPSERT_UPDATED}
-            and hasattr(self.job_repository, "find_existing")
-        ):
+        needs_post_write = outcome in {UPSERT_INSERTED, UPSERT_UPDATED} and (
+            self.enrichment_service or self.embedding_service
+        )
+        if needs_post_write and hasattr(self.job_repository, "find_existing"):
             try:
                 existing = self.job_repository.find_existing(normalized)
-                if existing:
+            except Exception:
+                logger.exception("event=job_post_write_lookup_failed")
+                return
+            if not existing:
+                return
+            if self.enrichment_service:
+                try:
                     self.enrichment_service.enrich_job(
                         existing["id"], normalized.description
                     )
-            except Exception:
-                logger.exception("event=job_enrichment_failed")
+                except Exception:
+                    logger.exception("event=job_enrichment_failed")
+            if self.embedding_service:
+                try:
+                    self.embedding_service.embed_job(
+                        Job(
+                            id=existing["id"],
+                            title=normalized.title,
+                            company=normalized.company,
+                            location=normalized.location_normalized
+                            or normalized.location_raw,
+                            description=normalized.description,
+                            persisted_skills=extract_skills(normalized.description)
+                            or None,
+                            experience_level=normalized.experience_level,
+                            posted_at=normalized.posted_at,
+                        )
+                    )
+                except Exception:
+                    logger.exception("event=job_embedding_failed")
 
     def _safe_finish(self, run_id: int, counts: IngestionCounts) -> None:
         try:

@@ -92,6 +92,26 @@ def test_malformed_record_does_not_stop_the_run():
     assert {row["source_job_id"] for row in jobs.rows} == {"1", "2"}
 
 
+def test_embedding_failure_does_not_fail_ingest():
+    jobs = InMemoryJobRepository()
+    runs = InMemoryRunRepository()
+
+    class BoomEmbeddings:
+        def embed_job(self, job):
+            raise RuntimeError("embedding backend failed")
+
+    service = IngestionService(
+        jobs,
+        runs,
+        now_fn=lambda: datetime(2026, 1, 1, tzinfo=timezone.utc),
+        embedding_service=BoomEmbeddings(),
+    )
+    counts = service.run(StaticJobSource([_raw("1")]))
+    assert counts.status == "completed"
+    assert counts.records_inserted == 1
+    assert len(jobs.rows) == 1
+
+
 def test_source_failure_marks_run_failed():
     service, _jobs, runs = _service()
 

@@ -40,6 +40,8 @@ class JobRepository:
                             j.company,
                             COALESCE(j.location_normalized, j.location_raw) AS location,
                             j.description,
+                            j.experience_level,
+                            j.posted_at,
                             COALESCE(
                                 ARRAY_AGG(s.canonical_name ORDER BY s.id)
                                 FILTER (WHERE s.canonical_name IS NOT NULL),
@@ -61,7 +63,7 @@ class JobRepository:
 
         jobs = []
         for row in rows:
-            skill_names = list(row[5] or [])
+            skill_names = list(row[7] or [])
             jobs.append(
                 Job(
                     id=row[0],
@@ -70,6 +72,8 @@ class JobRepository:
                     location=row[3],
                     description=row[4] or "",
                     persisted_skills=skill_names or None,
+                    experience_level=row[5],
+                    posted_at=row[6],
                 )
             )
         return jobs
@@ -88,7 +92,9 @@ class JobRepository:
                             j.title,
                             j.company,
                             COALESCE(j.location_normalized, j.location_raw),
-                            j.description
+                            j.description,
+                            j.experience_level,
+                            j.posted_at
                         FROM jobs j
                         WHERE j.id = %s
                         """,
@@ -107,6 +113,8 @@ class JobRepository:
             company=row[2],
             location=row[3],
             description=row[4] or "",
+            experience_level=row[5],
+            posted_at=row[6],
         )
 
     def list_jobs_for_enrichment(
@@ -138,7 +146,9 @@ class JobRepository:
                         f"""
                         SELECT j.id, j.title, j.company,
                                COALESCE(j.location_normalized, j.location_raw),
-                               j.description
+                               j.description,
+                               j.experience_level,
+                               j.posted_at
                         FROM jobs j
                         {where}
                         ORDER BY j.id
@@ -158,6 +168,8 @@ class JobRepository:
                 company=row[2],
                 location=row[3],
                 description=row[4] or "",
+                experience_level=row[5],
+                posted_at=row[6],
             )
             for row in rows
         ]

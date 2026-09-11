@@ -47,3 +47,8 @@ class IngestionError(AppError):
 class TaxonomyError(AppError):
     def __init__(self, message: str = "Skill taxonomy is invalid.") -> None:
         super().__init__(message, 500)
+
+
+class EmbeddingProviderError(AppError):
+    def __init__(self, message: str = "Embedding provider is not available.") -> None:
+        super().__init__(message, 500)

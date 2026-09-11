@@ -8,8 +8,8 @@ import pytest
 
 from app.core.config import clear_settings_cache
 
-CONTAINER_NAME = "jmi-phase2-pg"
-IMAGE = "postgres:16-alpine"
+CONTAINER_NAME = "jmi-phase4-pg"
+IMAGE = "pgvector/pgvector:pg16"
 TEST_PORT = "55432"
 TEST_URL = f"postgresql://test:test@127.0.0.1:{TEST_PORT}/job_market_test"
 

@@ -2,21 +2,22 @@
 
 An end-to-end résumé-to-job matching application. A user uploads a PDF résumé; the API extracts text and technical skills, compares the résumé to jobs stored in PostgreSQL, and returns a ranked list with matched and missing skills.
 
-This repository is a Phase 3 modular FastAPI application: matching, Adzuna ingestion, a curated skill taxonomy, job-skill enrichment, and basic skill-demand analytics. Embeddings and semantic retrieval are **not** implemented (Phase 4).
+This repository is a Phase 4 modular FastAPI application: matching, Adzuna ingestion, a curated skill taxonomy, job-skill enrichment, skill-demand analytics, embedding generation, pgvector candidate retrieval, and an explainable hybrid ranker. Ranking evaluation is **not** implemented (Phase 5).
 
 ---
 
 ## Implemented now
 
-1. Upload a PDF résumé at `POST /upload-resume`.
+1. Upload a PDF résumé at `POST /upload-resume` for the TF-IDF lexical baseline.
 2. Extract canonical skills from a curated taxonomy (`data/taxonomy/skills.yml`).
 3. Ingest jobs from Adzuna, normalize, deduplicate, and upsert into PostgreSQL.
 4. Persist job-skill relationships and compute skill-demand shares in SQL.
-5. Rank jobs with pairwise TF-IDF plus canonical skill overlap (`hybrid_score`).
+5. Generate job embeddings and retrieve a candidate set with pgvector.
+6. Rerank candidates with a hybrid score and per-component explanation (`POST /api/v1/matches`).
 
 ## Roadmap / future work
 
-Not built yet: embeddings / pgvector, semantic retrieval, ranking evaluation, historical trend claims, Docker Compose app stack, CI.
+Not built yet: labeled ranking evaluation, historical trend claims, skill-gap frequency product, Docker Compose app stack, CI.
 
 ---
 
@@ -26,21 +27,27 @@ Not built yet: embeddings / pgvector, semantic retrieval, ranking evaluation, hi
 Adzuna adapter
     -> RawJob -> normalize -> dedupe -> jobs upsert
     -> best-effort skill enrichment -> job_skills
+    -> best-effort embedding generation -> job_embeddings
 
-data/taxonomy/skills.yml
-    -> sync_skills -> skills / skill_aliases
+Resume
+    -> embedding
+    -> pgvector candidate retrieval (or in-memory fallback)
+    -> structured features (semantic, skills, recency, location, experience)
+    -> hybrid ranker
+    -> explainable ranked jobs
 
-frontend
-    -> FastAPI matching (TF-IDF + canonical skill overlap)
-    -> GET /api/v1/skills
-    -> GET /api/v1/analytics/skills
+POST /upload-resume still uses the independent TF-IDF baseline.
 ```
 
-Matching uses persisted `job_skills` when present and falls back to live extraction for jobs that have not been enriched. The ranking **formula** is unchanged; detected skill names are now canonical (`PostgreSQL`, `scikit-learn`, `Apache Spark`).
+Matching uses persisted `job_skills` when present and falls back to live extraction for jobs that have not been enriched.
 
 ---
 
-## Ranking formula
+## Ranking
+
+Two rankers are available. Neither score is a hiring probability.
+
+### TF-IDF baseline (`rank_tfidf` / `POST /upload-resume`)
 
 Unchanged from Phase 1:
 
@@ -50,16 +57,37 @@ skill_score  = |matched_skills| / |job_skills|   if job_skills else 0
 hybrid_score = 0.7 * match_score + 0.3 * skill_score
 ```
 
-Results are sorted by `hybrid_score` descending. These weights are an un-evaluated heuristic, not a hiring probability.
+Pairwise TF-IDF fits a new vectorizer on exactly two documents. This is intentional and is not corpus-level TF-IDF.
 
-Matching reads `title`, `company`, `COALESCE(location_normalized, location_raw)`, and `description` from **active** jobs. Ranking math is the same.
+### Hybrid ranker (`POST /api/v1/matches`)
+
+```text
+hybrid_score =
+  w_semantic   * semantic_score +
+  w_skill      * skill_score +
+  w_experience * experience_score +
+  w_recency    * recency_score +
+  w_location   * location_score
+```
+
+Default weights (from DESIGN.md, not empirically tuned): `0.50 / 0.25 / 0.10 / 0.10 / 0.05`. Weights are normalized to sum to 1. Location and experience are used only when the request includes a preference; those weights are then dropped and the rest are renormalized.
+
+| Signal | Range | Rule |
+|---|---|---|
+| semantic | 0–1 | Cosine of résumé and job embeddings, clipped to `[0, 1]` |
+| skills | 0–1 | `matched / job_skills`, else `0` |
+| recency | 0–1 | `exp(-age_days / 30)`; missing `posted_at` is `0.5` |
+| experience | 0–1 | Explicit levels only: internship → lead; missing job level is `0.5` |
+| location | 0–1 | Exact `1.0`, substring/hybrid `0.5`, mismatch `0.0`; missing job location is `0.5` |
+
+If stored vectors exist for the current model, candidates are retrieved with pgvector (`ORDER BY embedding <=> query LIMIT N`). The ranker then scores only that candidate set. If no vectors exist, all active jobs are scored in memory with the same embedding provider. That fallback is documented and is not used once embeddings are stored.
 
 ---
 
 ## Requirements
 
 - Python 3.10+ recommended (`runtime.txt` specifies 3.10.13). Python 3.9 can run the current test suite.
-- PostgreSQL
+- PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector) extension
 
 ---
 
@@ -89,6 +117,12 @@ Edit `.env`. Do not commit `.env`.
 | `ADZUNA_APP_ID` | Yes, for ingestion | Adzuna application id |
 | `ADZUNA_APP_KEY` | Yes, for ingestion | Adzuna application key |
 | `ADZUNA_COUNTRY` | No (default `in`) | Adzuna country code |
+| `EMBEDDING_PROVIDER` | No (default `hashing`) | `hashing` or `sentence-transformers` |
+| `EMBEDDING_MODEL` | No (default `all-MiniLM-L6-v2`) | Model name when using sentence-transformers |
+| `EMBEDDING_DIMENSION` | No (default `256`) | Hashing-vector size |
+| `CANDIDATE_COUNT` | No (default `100`) | pgvector retrieval depth |
+| `RECENCY_TAU_DAYS` | No (default `30`) | Recency decay constant |
+| `RANK_WEIGHT_*` | No | Hybrid weights; normalized if they do not sum to 1 |
 
 ---
 
@@ -107,7 +141,10 @@ This creates:
 - `jobs` — canonical job records
 - `ingestion_runs` — per-run metrics
 - `skills`, `skill_aliases`, `job_skills` — taxonomy and enrichment
+- `job_embeddings` — one vector per job and embedding model
 - `schema_migrations` — applied versions
+
+Migration `005_job_embeddings.sql` runs `CREATE EXTENSION vector`. PostgreSQL must have pgvector installed. Test containers use `pgvector/pgvector:pg16`.
 
 If a Phase 1 `jobs` table exists (no `source` column), it is renamed to `jobs_legacy` and rows with both title and description are copied. Incomplete legacy rows are not invented.
 
@@ -144,6 +181,7 @@ python scripts/migrate.py
 python scripts/sync_skills.py
 python scripts/ingest_adzuna.py --query "data engineer" --pages 2
 python scripts/enrich_job_skills.py --only-missing
+python scripts/generate_embeddings.py --only-missing
 uvicorn app.main:app --reload
 ```
 
@@ -173,7 +211,20 @@ python scripts/enrich_job_skills.py --only-missing --limit 100
 python scripts/enrich_job_skills.py --job-id 12
 ```
 
-Ingestion stores jobs first, then attempts enrichment. A skill-enrichment failure does not fail the ingest run. Re-enrichment replaces stale links (Python+SQL → Python+Spark drops SQL).
+Ingestion stores jobs first, then attempts enrichment, then embeddings. A skill-enrichment or embedding failure does not fail the ingest run. Re-enrichment replaces stale links (Python+SQL → Python+Spark drops SQL). Embeddings are regenerated when the embedding text hash or model name changes.
+
+```bash
+python scripts/generate_embeddings.py --all
+python scripts/generate_embeddings.py --only-missing
+python scripts/generate_embeddings.py --job-id 12
+```
+
+The default embedding provider is deterministic hashed n-grams (`hashing-v1`). That keeps tests and local setup free of model downloads. It is a lexical vector, not a sentence-transformer. For semantic embeddings:
+
+```bash
+pip install sentence-transformers
+# EMBEDDING_PROVIDER=sentence-transformers
+```
 
 Analytics use SQL aggregates, not a full table load in Python:
 
@@ -230,7 +281,22 @@ Lists active stored jobs. Requires `DATABASE_URL`.
 
 ### `POST /upload-resume`
 
-Multipart field: `file` (PDF). Response includes `match_score`, `skill_score`, `hybrid_score`, `skills`, `matched_skills`, and `missing_skills` as **canonical** names.
+Multipart field: `file` (PDF). TF-IDF lexical baseline. Response includes `match_score`, `skill_score`, `hybrid_score`, `skills`, `matched_skills`, and `missing_skills` as **canonical** names.
+
+### `POST /api/v1/matches`
+
+JSON hybrid ranking. Example body:
+
+```json
+{
+  "resume_text": "python sql spark",
+  "preferred_location": "Bengaluru",
+  "preferred_experience": "mid",
+  "limit": 20
+}
+```
+
+Response includes `hybrid_score`, `components` (`semantic`, `skills`, `experience`, `recency`, `location`), matched/missing canonical skills, the embedding model, retrieval mode (`pgvector` or `in_memory_fallback`), and the weights actually used. `POST /api/v1/matches/upload` accepts a PDF plus the same optional form fields.
 
 ### `GET /api/v1/skills`
 
@@ -248,8 +314,12 @@ Job detail with canonical skills when available.
 
 ## Known limitations
 
-- Extraction is deterministic taxonomy matching, not NER or embeddings.
+- Default hashing embeddings are lexical, not semantic sentence embeddings.
+- Hybrid weights are an un-evaluated heuristic, not a hiring probability.
 - Jobs with no extracted skills receive `skill_score = 0`.
+- Experience uses explicit normalized levels only; years are not inferred from prose.
+- Location and experience affect ranking only when the user supplies a preference.
+- Missing `posted_at` uses a documented recency fallback of `0.5`.
 - Title/location analytics filters are substring `ILIKE`, not role classification.
 - Trend / “fastest growing” metrics are not claimed; history is still thin.
 - Adzuna is the only source. One request is not a complete snapshot of the market.
@@ -268,6 +338,7 @@ Job detail with canonical skills when available.
 | `docs/PHASE_1_SUMMARY.md` | Modular foundation |
 | `docs/PHASE_2_SUMMARY.md` | Ingestion pipeline |
 | `docs/PHASE_3_SUMMARY.md` | Skill taxonomy and enrichment |
+| `docs/PHASE_4_SUMMARY.md` | Embeddings, retrieval, hybrid ranking |
 
 ---
 

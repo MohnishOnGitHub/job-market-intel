@@ -25,11 +25,14 @@ from app.core.config import clear_settings_cache, get_settings
 from app.core.exceptions import DatabaseUnavailableError, JobSourceError
 from app.db.database import get_connection
 from app.db.migrate import apply_migrations
+from app.db.repositories.embeddings import EmbeddingRepository
 from app.db.repositories.ingestion_runs import IngestionRunRepository
 from app.db.repositories.jobs import JobRepository
 from app.db.repositories.skills import SkillRepository
 from app.ingestion.service import IngestionService
 from app.ingestion.sources.adzuna import AdzunaSource
+from app.services.embedding_provider import get_embedding_provider
+from app.services.job_embeddings import JobEmbeddingService
 from app.services.skill_enrichment import SkillEnrichmentService
 
 
@@ -84,6 +87,10 @@ def main(argv: list[str] | None = None) -> int:
                 enrichment_service=SkillEnrichmentService(
                     job_repository=jobs_repo,
                     skill_repository=SkillRepository(conn),
+                ),
+                embedding_service=JobEmbeddingService(
+                    embedding_repository=EmbeddingRepository(conn),
+                    provider=get_embedding_provider(),
                 ),
             )
             try:

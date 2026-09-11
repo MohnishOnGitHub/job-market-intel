@@ -44,6 +44,11 @@ def compute_hybrid_score(match_score: float, skill_score: float) -> float:
     return round(TFIDF_WEIGHT * match_score + SKILL_WEIGHT * skill_score, 3)
 
 
+def rank_tfidf(resume_text: str, jobs: Sequence[Job]) -> List[MatchedJob]:
+    """Independent lexical baseline. Do not replace this with hybrid ranking."""
+    return rank_jobs(resume_text, jobs)
+
+
 def rank_jobs(resume_text: str, jobs: Sequence[Job]) -> List[MatchedJob]:
     resume_skills = extract_skills(resume_text)
     results: List[MatchedJob] = []

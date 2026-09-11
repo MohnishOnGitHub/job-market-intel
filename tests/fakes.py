@@ -43,6 +43,18 @@ class InMemoryJobRepository:
                     return row
         return None
 
+    def find_existing(self, job: NormalizedJob) -> Optional[dict]:
+        row = self._find(job)
+        if row is None:
+            return None
+        return {
+            "id": row["id"],
+            "content_hash": row["content_hash"],
+            "first_seen_at": row["first_seen_at"],
+            "source_job_id": row["source_job_id"],
+            "source_url": row["source_url"],
+        }
+
     def upsert(self, job: NormalizedJob, now: Optional[datetime] = None) -> str:
         moment = now or datetime.now(timezone.utc)
         existing = self._find(job)

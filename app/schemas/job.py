@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -17,6 +18,8 @@ class Job(BaseModel):
     location: Optional[str] = None
     description: str = ""
     persisted_skills: Optional[List[str]] = None
+    experience_level: Optional[str] = None
+    posted_at: Optional[datetime] = None
 
 
 class JobListItem(BaseModel):

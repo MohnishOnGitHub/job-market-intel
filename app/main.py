@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.health import router as health_router
 from app.api.routes.jobs import router as jobs_router
+from app.api.routes.matches import router as matches_router
 from app.api.routes.matching import router as matching_router
 from app.api.routes.skills import router as skills_router
 from app.core.config import get_settings
@@ -38,7 +39,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="Job Market Intel",
-        description="Résumé-to-job matching MVP with TF-IDF and skill-overlap ranking.",
+        description="Résumé-to-job matching with a TF-IDF baseline and hybrid semantic ranking.",
         version="0.1.0",
     )
 
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
     app.include_router(matching_router)
     app.include_router(skills_router, prefix="/api/v1")
     app.include_router(analytics_router, prefix="/api/v1")
+    app.include_router(matches_router, prefix="/api/v1")
 
     if FRONTEND_DIR.is_dir():
         app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
