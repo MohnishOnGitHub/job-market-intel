@@ -1,0 +1,644 @@
+# Curated technical skill taxonomy for Job Market Intel.
+# Source of truth for Phase 3 extraction. Precision over recall.
+# match_strategy: boundary (default) | isolated_letter
+
+Python:
+  category: Programming
+  aliases: [python]
+
+Java:
+  category: Programming
+  aliases: [java]
+
+JavaScript:
+  category: Programming
+  aliases: [javascript, js]
+
+TypeScript:
+  category: Programming
+  aliases: [typescript, ts]
+
+Scala:
+  category: Programming
+  aliases: [scala]
+
+Kotlin:
+  category: Programming
+  aliases: [kotlin]
+
+Rust:
+  category: Programming
+  aliases: [rust]
+
+"C++":
+  category: Programming
+  aliases: [c++, cpp, c plus plus]
+
+"C#":
+  category: Programming
+  aliases: [c#, csharp, c sharp]
+
+Golang:
+  category: Programming
+  aliases: [golang, go lang]
+
+Ruby:
+  category: Programming
+  aliases: [ruby]
+
+PHP:
+  category: Programming
+  aliases: [php]
+
+Swift:
+  category: Programming
+  aliases: [swift]
+
+MATLAB:
+  category: Programming
+  aliases: [matlab]
+
+Julia:
+  category: Programming
+  aliases: [julia]
+
+Bash:
+  category: Programming
+  aliases: [bash]
+
+PowerShell:
+  category: Programming
+  aliases: [powershell]
+
+R:
+  category: Programming
+  aliases: [R]
+  match_strategy: isolated_letter
+
+SAS:
+  category: Programming
+  aliases: [sas]
+
+VBA:
+  category: Programming
+  aliases: [vba]
+
+SQL:
+  category: Databases
+  aliases: [sql]
+
+PostgreSQL:
+  category: Databases
+  aliases: [postgresql, postgres]
+
+MySQL:
+  category: Databases
+  aliases: [mysql]
+
+SQLite:
+  category: Databases
+  aliases: [sqlite]
+
+MongoDB:
+  category: Databases
+  aliases: [mongodb, mongo]
+
+Redis:
+  category: Databases
+  aliases: [redis]
+
+Cassandra:
+  category: Databases
+  aliases: [cassandra]
+
+DynamoDB:
+  category: Databases
+  aliases: [dynamodb, dynamo db]
+
+Elasticsearch:
+  category: Databases
+  aliases: [elasticsearch, elastic search, opensearch]
+
+Neo4j:
+  category: Databases
+  aliases: [neo4j]
+
+Oracle:
+  category: Databases
+  aliases: [oracle]
+
+SQL Server:
+  category: Databases
+  aliases: [sql server, mssql, microsoft sql server]
+
+MariaDB:
+  category: Databases
+  aliases: [mariadb]
+
+CockroachDB:
+  category: Databases
+  aliases: [cockroachdb, cockroach db]
+
+NoSQL:
+  category: Databases
+  aliases: [nosql, no-sql, no sql]
+
+Firestore:
+  category: Databases
+  aliases: [firestore]
+
+Apache Spark:
+  category: Data Engineering
+  aliases: [apache spark, spark, pyspark]
+
+Hadoop:
+  category: Data Engineering
+  aliases: [hadoop]
+
+Apache Kafka:
+  category: Data Engineering
+  aliases: [apache kafka, kafka]
+
+Apache Airflow:
+  category: Data Engineering
+  aliases: [apache airflow, airflow]
+
+dbt:
+  category: Data Engineering
+  aliases: [dbt, data build tool]
+
+Apache Flink:
+  category: Data Engineering
+  aliases: [apache flink, flink]
+
+Apache Hive:
+  category: Data Engineering
+  aliases: [apache hive, hive]
+
+Apache NiFi:
+  category: Data Engineering
+  aliases: [apache nifi, nifi]
+
+Prefect:
+  category: Data Engineering
+  aliases: [prefect]
+
+Dagster:
+  category: Data Engineering
+  aliases: [dagster]
+
+Apache Beam:
+  category: Data Engineering
+  aliases: [apache beam, beam]
+
+Delta Lake:
+  category: Data Engineering
+  aliases: [delta lake, deltalake]
+
+Apache Iceberg:
+  category: Data Engineering
+  aliases: [apache iceberg, iceberg]
+
+Apache Parquet:
+  category: Data Engineering
+  aliases: [apache parquet, parquet]
+
+Apache Avro:
+  category: Data Engineering
+  aliases: [apache avro, avro]
+
+Databricks:
+  category: Data Engineering
+  aliases: [databricks]
+
+Luigi:
+  category: Data Engineering
+  aliases: [luigi]
+
+MapReduce:
+  category: Data Engineering
+  aliases: [mapreduce, map reduce]
+
+Spark Streaming:
+  category: Data Engineering
+  aliases: [spark streaming]
+
+Snowflake:
+  category: Data Warehousing
+  aliases: [snowflake]
+
+BigQuery:
+  category: Data Warehousing
+  aliases: [bigquery, big query]
+
+Amazon Redshift:
+  category: Data Warehousing
+  aliases: [amazon redshift, redshift]
+
+Azure Synapse:
+  category: Data Warehousing
+  aliases: [azure synapse, synapse]
+
+Teradata:
+  category: Data Warehousing
+  aliases: [teradata]
+
+ClickHouse:
+  category: Data Warehousing
+  aliases: [clickhouse, click house]
+
+Greenplum:
+  category: Data Warehousing
+  aliases: [greenplum]
+
+Machine Learning:
+  category: Machine Learning
+  aliases: [machine learning, machine-learning]
+
+scikit-learn:
+  category: Machine Learning
+  aliases: [scikit-learn, scikit learn, sklearn]
+
+XGBoost:
+  category: Machine Learning
+  aliases: [xgboost]
+
+LightGBM:
+  category: Machine Learning
+  aliases: [lightgbm, light gbm]
+
+CatBoost:
+  category: Machine Learning
+  aliases: [catboost]
+
+Statsmodels:
+  category: Machine Learning
+  aliases: [statsmodels]
+
+Prophet:
+  category: Machine Learning
+  aliases: [prophet, facebook prophet]
+
+Optuna:
+  category: Machine Learning
+  aliases: [optuna]
+
+Hyperopt:
+  category: Machine Learning
+  aliases: [hyperopt]
+
+MLlib:
+  category: Machine Learning
+  aliases: [mllib, spark mllib]
+
+Feature Engineering:
+  category: Machine Learning
+  aliases: [feature engineering]
+
+Recommendation Systems:
+  category: Machine Learning
+  aliases: [recommendation systems, recommender systems, recommendations]
+
+Deep Learning:
+  category: Deep Learning
+  aliases: [deep learning, deep-learning]
+
+TensorFlow:
+  category: Deep Learning
+  aliases: [tensorflow]
+
+PyTorch:
+  category: Deep Learning
+  aliases: [pytorch]
+
+Keras:
+  category: Deep Learning
+  aliases: [keras]
+
+JAX:
+  category: Deep Learning
+  aliases: [jax]
+
+ONNX:
+  category: Deep Learning
+  aliases: [onnx]
+
+FastAI:
+  category: Deep Learning
+  aliases: [fastai, fast.ai]
+
+MXNet:
+  category: Deep Learning
+  aliases: [mxnet]
+
+NLP:
+  category: NLP
+  aliases: [nlp, natural language processing]
+
+spaCy:
+  category: NLP
+  aliases: [spacy]
+
+NLTK:
+  category: NLP
+  aliases: [nltk]
+
+Hugging Face:
+  category: NLP
+  aliases: [hugging face, huggingface]
+
+Transformers:
+  category: NLP
+  aliases: [transformers]
+
+Gensim:
+  category: NLP
+  aliases: [gensim]
+
+BERT:
+  category: NLP
+  aliases: [bert]
+
+Word2Vec:
+  category: NLP
+  aliases: [word2vec, word 2 vec]
+
+Computer Vision:
+  category: Computer Vision
+  aliases: [computer vision]
+
+OpenCV:
+  category: Computer Vision
+  aliases: [opencv, open cv]
+
+YOLO:
+  category: Computer Vision
+  aliases: [yolo]
+
+Pillow:
+  category: Computer Vision
+  aliases: [pillow, pil]
+
+Detectron2:
+  category: Computer Vision
+  aliases: [detectron2, detectron]
+
+AWS:
+  category: Cloud
+  aliases: [aws, amazon web services]
+
+GCP:
+  category: Cloud
+  aliases: [gcp, google cloud, google cloud platform]
+
+Microsoft Azure:
+  category: Cloud
+  aliases: [microsoft azure, azure]
+
+Amazon S3:
+  category: Cloud
+  aliases: [amazon s3, s3, aws s3]
+
+Amazon EC2:
+  category: Cloud
+  aliases: [amazon ec2, ec2]
+
+AWS Lambda:
+  category: Cloud
+  aliases: [aws lambda]
+
+Amazon SageMaker:
+  category: Cloud
+  aliases: [amazon sagemaker, sagemaker]
+
+Google Vertex AI:
+  category: Cloud
+  aliases: [google vertex ai, vertex ai, vertexai]
+
+Azure Machine Learning:
+  category: Cloud
+  aliases: [azure machine learning, azure ml, azureml]
+
+Amazon EMR:
+  category: Cloud
+  aliases: [amazon emr, emr, aws emr]
+
+Amazon Athena:
+  category: Cloud
+  aliases: [amazon athena, athena]
+
+AWS Glue:
+  category: Cloud
+  aliases: [aws glue]
+
+Amazon RDS:
+  category: Cloud
+  aliases: [amazon rds, rds, aws rds]
+
+MLflow:
+  category: MLOps
+  aliases: [mlflow]
+
+Kubeflow:
+  category: MLOps
+  aliases: [kubeflow]
+
+Weights & Biases:
+  category: MLOps
+  aliases: [weights & biases, weights and biases, wandb]
+
+DVC:
+  category: MLOps
+  aliases: [dvc]
+
+Feast:
+  category: MLOps
+  aliases: [feast]
+
+BentoML:
+  category: MLOps
+  aliases: [bentoml]
+
+Seldon:
+  category: MLOps
+  aliases: [seldon]
+
+TFX:
+  category: MLOps
+  aliases: [tfx, tensorflow extended]
+
+Feature Store:
+  category: MLOps
+  aliases: [feature store]
+
+Docker:
+  category: DevOps
+  aliases: [docker]
+
+Kubernetes:
+  category: DevOps
+  aliases: [kubernetes, k8s]
+
+Terraform:
+  category: DevOps
+  aliases: [terraform]
+
+Ansible:
+  category: DevOps
+  aliases: [ansible]
+
+Jenkins:
+  category: DevOps
+  aliases: [jenkins]
+
+GitHub Actions:
+  category: DevOps
+  aliases: [github actions]
+
+GitLab CI:
+  category: DevOps
+  aliases: [gitlab ci, gitlab ci/cd]
+
+Prometheus:
+  category: DevOps
+  aliases: [prometheus]
+
+Grafana:
+  category: DevOps
+  aliases: [grafana]
+
+Linux:
+  category: DevOps
+  aliases: [linux]
+
+Git:
+  category: DevOps
+  aliases: [git]
+
+Nginx:
+  category: DevOps
+  aliases: [nginx]
+
+Helm:
+  category: DevOps
+  aliases: [helm]
+
+CI/CD:
+  category: DevOps
+  aliases: [ci/cd, cicd, continuous integration]
+
+Excel:
+  category: Analytics / BI
+  aliases: [excel, microsoft excel]
+
+Tableau:
+  category: Analytics / BI
+  aliases: [tableau]
+
+Power BI:
+  category: Analytics / BI
+  aliases: [power bi, powerbi]
+
+Looker:
+  category: Analytics / BI
+  aliases: [looker]
+
+Apache Superset:
+  category: Analytics / BI
+  aliases: [apache superset, superset]
+
+Metabase:
+  category: Analytics / BI
+  aliases: [metabase]
+
+pandas:
+  category: Analytics / BI
+  aliases: [pandas]
+
+NumPy:
+  category: Analytics / BI
+  aliases: [numpy]
+
+Matplotlib:
+  category: Analytics / BI
+  aliases: [matplotlib]
+
+Seaborn:
+  category: Analytics / BI
+  aliases: [seaborn]
+
+Plotly:
+  category: Analytics / BI
+  aliases: [plotly]
+
+Alteryx:
+  category: Analytics / BI
+  aliases: [alteryx]
+
+A/B Testing:
+  category: Analytics / BI
+  aliases: [a/b testing, ab testing, a-b testing]
+
+Statistics:
+  category: Analytics / BI
+  aliases: [statistics, statistical analysis]
+
+FastAPI:
+  category: Frameworks
+  aliases: [fastapi]
+
+Django:
+  category: Frameworks
+  aliases: [django]
+
+Flask:
+  category: Frameworks
+  aliases: [flask]
+
+React:
+  category: Frameworks
+  aliases: [react, react.js, reactjs]
+
+Node.js:
+  category: Frameworks
+  aliases: [node.js, nodejs]
+
+Spring Boot:
+  category: Frameworks
+  aliases: [spring boot, springboot]
+
+Streamlit:
+  category: Frameworks
+  aliases: [streamlit]
+
+Gradio:
+  category: Frameworks
+  aliases: [gradio]
+
+Dash:
+  category: Frameworks
+  aliases: [plotly dash]
+
+Next.js:
+  category: Frameworks
+  aliases: [next.js, nextjs]
+
+Vue.js:
+  category: Frameworks
+  aliases: [vue.js, vuejs, vue]
+
+HTML:
+  category: Frameworks
+  aliases: [html]
+
+CSS:
+  category: Frameworks
+  aliases: [css]
+
+REST:
+  category: Frameworks
+  aliases: [rest, rest api, restful, restful api]
+
+GraphQL:
+  category: Frameworks
+  aliases: [graphql]

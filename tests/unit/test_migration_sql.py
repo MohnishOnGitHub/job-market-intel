@@ -23,6 +23,15 @@ def test_jobs_migration_defines_canonical_columns_and_identity():
     assert "uq_jobs_source_source_url" in sql
 
 
+def test_skills_migration_defines_tables_and_uniqueness():
+    sql = (MIGRATIONS / "004_skills.sql").read_text(encoding="utf-8")
+    assert "CREATE TABLE IF NOT EXISTS skills" in sql
+    assert "CREATE TABLE IF NOT EXISTS skill_aliases" in sql
+    assert "CREATE TABLE IF NOT EXISTS job_skills" in sql
+    assert "PRIMARY KEY (job_id, skill_id)" in sql
+    assert "canonical_name TEXT NOT NULL UNIQUE" in sql
+
+
 def test_ingestion_runs_migration_defines_metrics():
     sql = (MIGRATIONS / "003_ingestion_runs.sql").read_text(encoding="utf-8")
     for column in (

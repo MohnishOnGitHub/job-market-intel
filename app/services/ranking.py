@@ -51,7 +51,10 @@ def rank_jobs(resume_text: str, jobs: Sequence[Job]) -> List[MatchedJob]:
     for job in jobs:
         job_text = (job.description or "").lower()
         match_score = pairwise_tfidf_score(resume_text, job_text)
-        job_skills = extract_skills(job_text)
+        if job.persisted_skills is not None:
+            job_skills = list(job.persisted_skills)
+        else:
+            job_skills = extract_skills(job.description)
         matched_skills, missing_skills = skill_overlap(resume_skills, job_skills)
         skill_score = compute_skill_score(matched_skills, job_skills)
         hybrid_score = compute_hybrid_score(match_score, skill_score)

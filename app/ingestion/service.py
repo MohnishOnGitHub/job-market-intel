@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import Callable, Optional
 
 from app.core.exceptions import DatabaseUnavailableError, JobSourceError, JobValidationError
+from app.services.skill_enrichment import SkillEnrichmentService
 from app.db.repositories.ingestion_runs import IngestionRunRepository
 from app.db.repositories.jobs import (
     UPSERT_INSERTED,
@@ -25,10 +26,12 @@ class IngestionService:
         job_repository: JobRepository,
         run_repository: IngestionRunRepository,
         now_fn: Optional[Callable[[], datetime]] = None,
+        enrichment_service: Optional[SkillEnrichmentService] = None,
     ) -> None:
         self.job_repository = job_repository
         self.run_repository = run_repository
         self.now_fn = now_fn or (lambda: datetime.now(timezone.utc))
+        self.enrichment_service = enrichment_service
 
     def run(self, source: JobSource) -> IngestionCounts:
         source_name = getattr(source, "name", "unknown")
@@ -116,6 +119,21 @@ class IngestionService:
             counts.records_unchanged += 1
         else:
             counts.records_failed += 1
+            return
+
+        if (
+            self.enrichment_service
+            and outcome in {UPSERT_INSERTED, UPSERT_UPDATED}
+            and hasattr(self.job_repository, "find_existing")
+        ):
+            try:
+                existing = self.job_repository.find_existing(normalized)
+                if existing:
+                    self.enrichment_service.enrich_job(
+                        existing["id"], normalized.description
+                    )
+            except Exception:
+                logger.exception("event=job_enrichment_failed")
 
     def _safe_finish(self, run_id: int, counts: IngestionCounts) -> None:
         try:

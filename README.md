@@ -2,22 +2,21 @@
 
 An end-to-end résumé-to-job matching application. A user uploads a PDF résumé; the API extracts text and technical skills, compares the résumé to jobs stored in PostgreSQL, and returns a ranked list with matched and missing skills.
 
-This repository is a Phase 2 modular FastAPI application: matching from Phase 1 plus a reproducible Adzuna ingestion pipeline. Later phases (skill taxonomy, embeddings, evaluation, and market analytics) are specified in `docs/PRD.md` and `docs/DESIGN.md` and are **not implemented yet**.
+This repository is a Phase 3 modular FastAPI application: matching, Adzuna ingestion, a curated skill taxonomy, job-skill enrichment, and basic skill-demand analytics. Embeddings and semantic retrieval are **not** implemented (Phase 4).
 
 ---
 
 ## Implemented now
 
 1. Upload a PDF résumé at `POST /upload-resume`.
-2. Extract text in memory and detect skills with boundary-aware matching.
-3. Ingest jobs from Adzuna through a source adapter.
-4. Normalize, deterministically deduplicate, and upsert into PostgreSQL.
-5. Track `first_seen_at` / `last_seen_at` and ingestion-run metrics.
-6. Rank stored jobs with pairwise TF-IDF plus skill overlap (`hybrid_score`).
+2. Extract canonical skills from a curated taxonomy (`data/taxonomy/skills.yml`).
+3. Ingest jobs from Adzuna, normalize, deduplicate, and upsert into PostgreSQL.
+4. Persist job-skill relationships and compute skill-demand shares in SQL.
+5. Rank jobs with pairwise TF-IDF plus canonical skill overlap (`hybrid_score`).
 
 ## Roadmap / future work
 
-Not built yet: skill taxonomy and aliases, embeddings / pgvector, semantic retrieval, ranking evaluation, market analytics, Docker Compose app stack, CI.
+Not built yet: embeddings / pgvector, semantic retrieval, ranking evaluation, historical trend claims, Docker Compose app stack, CI.
 
 ---
 
@@ -25,17 +24,19 @@ Not built yet: skill taxonomy and aliases, embeddings / pgvector, semantic retri
 
 ```text
 Adzuna adapter
-    -> RawJob
-    -> validate / normalize
-    -> deterministic dedupe
-    -> PostgreSQL upsert
-    -> ingestion_runs metrics
+    -> RawJob -> normalize -> dedupe -> jobs upsert
+    -> best-effort skill enrichment -> job_skills
 
-frontend/index.html
-    -> FastAPI
-    -> resume parser + skill extractor + ranking
-    -> jobs repository (active jobs)
+data/taxonomy/skills.yml
+    -> sync_skills -> skills / skill_aliases
+
+frontend
+    -> FastAPI matching (TF-IDF + canonical skill overlap)
+    -> GET /api/v1/skills
+    -> GET /api/v1/analytics/skills
 ```
+
+Matching uses persisted `job_skills` when present and falls back to live extraction for jobs that have not been enriched. The ranking **formula** is unchanged; detected skill names are now canonical (`PostgreSQL`, `scikit-learn`, `Apache Spark`).
 
 ---
 
@@ -93,7 +94,7 @@ Edit `.env`. Do not commit `.env`.
 
 ## Database setup and migrations
 
-Migrations are numbered SQL files under `app/db/migrations/`, applied by a small runner that records versions in `schema_migrations`. Alembic is not used: the project has no ORM and only two application tables.
+Migrations are numbered SQL files under `app/db/migrations/`, applied by a small runner that records versions in `schema_migrations`. Alembic is not used: the project has no ORM.
 
 ```bash
 python scripts/migrate.py
@@ -105,6 +106,7 @@ This creates:
 
 - `jobs` — canonical job records
 - `ingestion_runs` — per-run metrics
+- `skills`, `skill_aliases`, `job_skills` — taxonomy and enrichment
 - `schema_migrations` — applied versions
 
 If a Phase 1 `jobs` table exists (no `source` column), it is renamed to `jobs_legacy` and rows with both title and description are copied. Incomplete legacy rows are not invented.
@@ -139,7 +141,9 @@ The CLI is thin. Fetching, normalization, dedupe, upsert, and metrics live in `a
 ```bash
 cp .env.example .env          # set DATABASE_URL and Adzuna keys
 python scripts/migrate.py
+python scripts/sync_skills.py
 python scripts/ingest_adzuna.py --query "data engineer" --pages 2
+python scripts/enrich_job_skills.py --only-missing
 uvicorn app.main:app --reload
 ```
 
@@ -155,6 +159,28 @@ Then open http://127.0.0.1:8000 and upload a résumé.
 Company + title alone never merges two jobs.
 
 Re-running the same mocked or live snapshot should insert once, then report unchanged rows, not duplicates.
+
+---
+
+## Skill intelligence
+
+The taxonomy file `data/taxonomy/skills.yml` is the source of truth (~160 technical skills, aliases, categories). Extraction is deterministic: boundary-aware, alias-aware, canonicalized. Short tokens such as `R` use an isolated-letter rule. `Go` and `C` are not matched as English words.
+
+```bash
+python scripts/sync_skills.py              # upsert skills/aliases; does not delete extras
+python scripts/enrich_job_skills.py --all  # replace job_skills per job
+python scripts/enrich_job_skills.py --only-missing --limit 100
+python scripts/enrich_job_skills.py --job-id 12
+```
+
+Ingestion stores jobs first, then attempts enrichment. A skill-enrichment failure does not fail the ingest run. Re-enrichment replaces stale links (Python+SQL → Python+Spark drops SQL).
+
+Analytics use SQL aggregates, not a full table load in Python:
+
+- `GET /api/v1/skills`
+- `GET /api/v1/analytics/skills?title=Data%20Engineer&location=Bengaluru&limit=25`
+
+Title and location filters are conservative `ILIKE` matches, not a job-family classifier.
 
 ---
 
@@ -204,17 +230,29 @@ Lists active stored jobs. Requires `DATABASE_URL`.
 
 ### `POST /upload-resume`
 
-Multipart field: `file` (PDF). Response includes `match_score`, `skill_score`, `hybrid_score`, `skills`, `matched_skills`, and `missing_skills`.
+Multipart field: `file` (PDF). Response includes `match_score`, `skill_score`, `hybrid_score`, `skills`, `matched_skills`, and `missing_skills` as **canonical** names.
+
+### `GET /api/v1/skills`
+
+Taxonomy list. Falls back to the YAML file if the database is empty or unavailable.
+
+### `GET /api/v1/analytics/skills`
+
+Skill demand among active jobs. Optional `title`, `location`, `limit`. Requires PostgreSQL.
+
+### `GET /jobs/{id}`
+
+Job detail with canonical skills when available.
 
 ---
 
 ## Known limitations
 
-- Skill extraction uses a fixed 21-item list, not a taxonomy with aliases.
+- Extraction is deterministic taxonomy matching, not NER or embeddings.
 - Jobs with no extracted skills receive `skill_score = 0`.
-- Pairwise TF-IDF is scored in Python for every active job.
+- Title/location analytics filters are substring `ILIKE`, not role classification.
+- Trend / “fastest growing” metrics are not claimed; history is still thin.
 - Adzuna is the only source. One request is not a complete snapshot of the market.
-- Predicted Adzuna salaries are discarded (they are inferred, not posted).
 - Automatic job deactivation is not implemented.
 - A previous version of this repository committed a plaintext database password. Rotate it outside git.
 
@@ -229,6 +267,7 @@ Multipart field: `file` (PDF). Response includes `match_score`, `skill_score`, `
 | `docs/PHASE_0_AUDIT.md` | Pre-refactor audit of the MVP |
 | `docs/PHASE_1_SUMMARY.md` | Modular foundation |
 | `docs/PHASE_2_SUMMARY.md` | Ingestion pipeline |
+| `docs/PHASE_3_SUMMARY.md` | Skill taxonomy and enrichment |
 
 ---
 

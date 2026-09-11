@@ -89,8 +89,8 @@ def test_ranking_order_follows_hybrid_score():
     ranked = rank_jobs("python sql pandas fastapi experience", jobs)
     assert [job.id for job in ranked] == [2, 1, 3]
     assert ranked[0].hybrid_score >= ranked[1].hybrid_score >= ranked[2].hybrid_score
-    assert "python" in ranked[0].matched_skills
-    assert "kubernetes" in ranked[1].missing_skills
+    assert "Python" in ranked[0].matched_skills
+    assert "Kubernetes" in ranked[1].missing_skills
 
 
 def test_rank_jobs_includes_score_components():
@@ -107,8 +107,29 @@ def test_rank_jobs_includes_score_components():
     assert result.match_score == pairwise_tfidf_score(
         "python sql pandas", "python sql spark aws"
     )
-    assert result.matched_skills == ["python", "sql"]
-    assert result.missing_skills == ["aws", "spark"]
-    assert result.skills == ["python", "sql", "aws", "spark"]
+    assert result.matched_skills == ["Python", "SQL"]
+    assert result.missing_skills == ["Apache Spark", "AWS"]
+    assert result.skills == ["Python", "SQL", "Apache Spark", "AWS"]
     assert result.skill_score == 0.5
     assert result.hybrid_score == compute_hybrid_score(result.match_score, 0.5)
+
+
+def test_persisted_skills_are_preferred_over_description_extraction():
+    jobs = [
+        Job(
+            id=1,
+            title="Data role",
+            company="Co",
+            location="Bengaluru",
+            description="python sql spark aws",
+            persisted_skills=["Python", "Apache Spark"],
+        )
+    ]
+    result = rank_jobs("python sql pandas", jobs)[0]
+    assert result.skills == ["Python", "Apache Spark"]
+    assert result.matched_skills == ["Python"]
+    assert result.missing_skills == ["Apache Spark"]
+    assert result.skill_score == 0.5
+    assert result.hybrid_score == compute_hybrid_score(result.match_score, 0.5)
+    assert TFIDF_WEIGHT == 0.7
+    assert SKILL_WEIGHT == 0.3

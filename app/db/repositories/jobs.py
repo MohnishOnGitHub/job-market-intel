@@ -35,14 +35,22 @@ class JobRepository:
                     cursor.execute(
                         """
                         SELECT
-                            id,
-                            title,
-                            company,
-                            COALESCE(location_normalized, location_raw) AS location,
-                            description
-                        FROM jobs
-                        WHERE active = TRUE
-                        ORDER BY id
+                            j.id,
+                            j.title,
+                            j.company,
+                            COALESCE(j.location_normalized, j.location_raw) AS location,
+                            j.description,
+                            COALESCE(
+                                ARRAY_AGG(s.canonical_name ORDER BY s.id)
+                                FILTER (WHERE s.canonical_name IS NOT NULL),
+                                ARRAY[]::text[]
+                            ) AS skill_names
+                        FROM jobs j
+                        LEFT JOIN job_skills js ON js.job_id = j.id
+                        LEFT JOIN skills s ON s.id = js.skill_id
+                        WHERE j.active = TRUE
+                        GROUP BY j.id
+                        ORDER BY j.id
                         """
                     )
                     rows = cursor.fetchall()
@@ -51,6 +59,98 @@ class JobRepository:
         except psycopg2.Error as exc:
             raise DatabaseUnavailableError("Database is unavailable.") from exc
 
+        jobs = []
+        for row in rows:
+            skill_names = list(row[5] or [])
+            jobs.append(
+                Job(
+                    id=row[0],
+                    title=row[1],
+                    company=row[2],
+                    location=row[3],
+                    description=row[4] or "",
+                    persisted_skills=skill_names or None,
+                )
+            )
+        return jobs
+
+    def get_job(self, job_id: int) -> Optional[Job]:
+        for job in self.list_jobs():
+            if job.id == job_id:
+                return job
+        try:
+            with self._conn() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        SELECT
+                            j.id,
+                            j.title,
+                            j.company,
+                            COALESCE(j.location_normalized, j.location_raw),
+                            j.description
+                        FROM jobs j
+                        WHERE j.id = %s
+                        """,
+                        (job_id,),
+                    )
+                    row = cursor.fetchone()
+        except DatabaseUnavailableError:
+            raise
+        except psycopg2.Error as exc:
+            raise DatabaseUnavailableError("Database is unavailable.") from exc
+        if row is None:
+            return None
+        return Job(
+            id=row[0],
+            title=row[1],
+            company=row[2],
+            location=row[3],
+            description=row[4] or "",
+        )
+
+    def list_jobs_for_enrichment(
+        self,
+        job_id: Optional[int] = None,
+        only_missing: bool = False,
+        limit: Optional[int] = None,
+        active_only: bool = True,
+    ) -> List[Job]:
+        filters = []
+        params: list = []
+        if active_only:
+            filters.append("j.active = TRUE")
+        if job_id is not None:
+            filters.append("j.id = %s")
+            params.append(job_id)
+        if only_missing:
+            filters.append(
+                "NOT EXISTS (SELECT 1 FROM job_skills js WHERE js.job_id = j.id)"
+            )
+        where = f"WHERE {' AND '.join(filters)}" if filters else ""
+        limit_sql = "LIMIT %s" if limit else ""
+        if limit:
+            params.append(limit)
+        try:
+            with self._conn() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        f"""
+                        SELECT j.id, j.title, j.company,
+                               COALESCE(j.location_normalized, j.location_raw),
+                               j.description
+                        FROM jobs j
+                        {where}
+                        ORDER BY j.id
+                        {limit_sql}
+                        """,
+                        params,
+                    )
+                    rows = cursor.fetchall()
+        except DatabaseUnavailableError:
+            raise
+        except psycopg2.Error as exc:
+            raise DatabaseUnavailableError("Database is unavailable.") from exc
         return [
             Job(
                 id=row[0],

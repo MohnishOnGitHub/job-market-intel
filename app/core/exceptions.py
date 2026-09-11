@@ -42,3 +42,8 @@ class JobSourceError(AppError):
 class IngestionError(AppError):
     def __init__(self, message: str = "Ingestion failed.") -> None:
         super().__init__(message, 500)
+
+
+class TaxonomyError(AppError):
+    def __init__(self, message: str = "Skill taxonomy is invalid.") -> None:
+        super().__init__(message, 500)

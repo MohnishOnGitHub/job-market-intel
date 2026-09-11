@@ -27,8 +27,10 @@ from app.db.database import get_connection
 from app.db.migrate import apply_migrations
 from app.db.repositories.ingestion_runs import IngestionRunRepository
 from app.db.repositories.jobs import JobRepository
+from app.db.repositories.skills import SkillRepository
 from app.ingestion.service import IngestionService
 from app.ingestion.sources.adzuna import AdzunaSource
+from app.services.skill_enrichment import SkillEnrichmentService
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -75,9 +77,14 @@ def main(argv: list[str] | None = None) -> int:
                 pages=args.pages,
                 results_per_page=args.results_per_page,
             )
+            jobs_repo = JobRepository(conn)
             service = IngestionService(
-                job_repository=JobRepository(conn),
+                job_repository=jobs_repo,
                 run_repository=IngestionRunRepository(conn),
+                enrichment_service=SkillEnrichmentService(
+                    job_repository=jobs_repo,
+                    skill_repository=SkillRepository(conn),
+                ),
             )
             try:
                 counts = service.run(source)

@@ -52,7 +52,7 @@ def test_upload_resume_ranks_mocked_jobs(client, app, monkeypatch):
     assert "skill_score" in jobs[0]
     assert "matched_skills" in jobs[0]
     assert "missing_skills" in jobs[0]
-    assert "python" in jobs[0]["matched_skills"]
+    assert "Python" in jobs[0]["matched_skills"]
     assert jobs[1]["skill_score"] == 0
     assert "improved_score" not in jobs[0]
     assert "projected_score" not in jobs[0]

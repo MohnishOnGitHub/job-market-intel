@@ -13,9 +13,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.api.routes.analytics import router as analytics_router
 from app.api.routes.health import router as health_router
 from app.api.routes.jobs import router as jobs_router
 from app.api.routes.matching import router as matching_router
+from app.api.routes.skills import router as skills_router
 from app.core.config import get_settings
 from app.core.exceptions import AppError
 
@@ -67,6 +69,8 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(jobs_router)
     app.include_router(matching_router)
+    app.include_router(skills_router, prefix="/api/v1")
+    app.include_router(analytics_router, prefix="/api/v1")
 
     if FRONTEND_DIR.is_dir():
         app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
