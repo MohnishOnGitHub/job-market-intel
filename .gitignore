@@ -11,3 +11,5 @@ __pycache__/
 dist/
 build/
 temp.pdf
+.cache/
+*.pt

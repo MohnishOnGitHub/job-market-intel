@@ -2,7 +2,7 @@
 
 An end-to-end résumé-to-job matching application. A user uploads a PDF résumé; the API extracts text and technical skills, compares the résumé to jobs stored in PostgreSQL, and returns a ranked list with matched and missing skills.
 
-This repository is a Phase 4 modular FastAPI application: matching, Adzuna ingestion, a curated skill taxonomy, job-skill enrichment, skill-demand analytics, embedding generation, pgvector candidate retrieval, and an explainable hybrid ranker. Ranking evaluation is **not** implemented (Phase 5).
+This repository is a Phase 5 modular FastAPI application: matching, Adzuna ingestion, a curated skill taxonomy, job-skill enrichment, skill-demand analytics, embedding generation, pgvector candidate retrieval, an explainable hybrid ranker, and an offline ranking evaluation fixture.
 
 ---
 
@@ -14,10 +14,11 @@ This repository is a Phase 4 modular FastAPI application: matching, Adzuna inges
 4. Persist job-skill relationships and compute skill-demand shares in SQL.
 5. Generate job embeddings and retrieve a candidate set with pgvector.
 6. Rerank candidates with a hybrid score and per-component explanation (`POST /api/v1/matches`).
+7. Evaluate rankers offline on a committed labeled fixture (`python scripts/evaluate_ranking.py`).
 
 ## Roadmap / future work
 
-Not built yet: labeled ranking evaluation, historical trend claims, skill-gap frequency product, Docker Compose app stack, CI.
+Not built yet: historical trend claims, skill-gap frequency product, Docker Compose app stack, CI.
 
 ---
 
@@ -74,7 +75,7 @@ Default weights (from DESIGN.md, not empirically tuned): `0.50 / 0.25 / 0.10 / 0
 
 | Signal | Range | Rule |
 |---|---|---|
-| semantic | 0–1 | Cosine of résumé and job embeddings, clipped to `[0, 1]` |
+| embedding (`semantic` field) | 0–1 | Cosine of résumé and job vectors, clipped to `[0, 1]`. With the default `hashing-v1` provider this is **lexical hashing**, not sentence-transformer semantics. |
 | skills | 0–1 | `matched / job_skills`, else `0` |
 | recency | 0–1 | `exp(-age_days / 30)`; missing `posted_at` is `0.5` |
 | experience | 0–1 | Explicit levels only: internship → lead; missing job level is `0.5` |
@@ -219,7 +220,7 @@ python scripts/generate_embeddings.py --only-missing
 python scripts/generate_embeddings.py --job-id 12
 ```
 
-The default embedding provider is deterministic hashed n-grams (`hashing-v1`). That keeps tests and local setup free of model downloads. It is a lexical vector, not a sentence-transformer. For semantic embeddings:
+The default embedding provider is deterministic hashed n-grams (`hashing-v1`). That keeps tests and local setup free of model downloads. It is lexical hashing retrieval, not semantic retrieval. For sentence-transformer embeddings:
 
 ```bash
 pip install sentence-transformers
@@ -312,10 +313,25 @@ Job detail with canonical skills when available.
 
 ---
 
+## Ranking evaluation
+
+Offline fixture: 8 synthetic profiles × 32 jobs = **256** independent labels (`data/evaluation/v1`). Profile-level split (5 validation / 3 test). Relevance ≥ 2 counts as relevant. Details: `docs/EVALUATION.md`.
+
+```bash
+python scripts/evaluate_ranking.py --dataset data/evaluation/v1 --split test
+```
+
+On the v1 **held-out test** set (3 profiles), DESIGN-weight hybrid ranking with hashing-v1 embeddings reached NDCG@10 **0.852** versus **0.757** for pairwise TF-IDF, **0.691** for lexical hashing-v1, and **0.586** for skill overlap. On the **validation** set (5 profiles), pairwise TF-IDF was ahead (NDCG@10 **0.685** vs hybrid **0.677**). That disagreement is why these numbers are directional, not a claim of statistically significant improvement.
+
+sentence-transformer semantic evaluation was **not run** (package not installed). Live pgvector retrieval was **not run**. hashing-v1 is lexical hashing retrieval, not semantic retrieval. Production weights were not changed.
+
+---
+
 ## Known limitations
 
-- Default hashing embeddings are lexical, not semantic sentence embeddings.
-- Hybrid weights are an un-evaluated heuristic, not a hiring probability.
+- Default hashing-v1 vectors are lexical hashing, not sentence-transformer semantics.
+- Hybrid DESIGN weights remain an un-evaluated production default. The v1 benchmark is too small to justify changing them.
+- Jobs with no extracted skills receive `skill_score = 0`.
 - Jobs with no extracted skills receive `skill_score = 0`.
 - Experience uses explicit normalized levels only; years are not inferred from prose.
 - Location and experience affect ranking only when the user supplies a preference.
@@ -339,6 +355,9 @@ Job detail with canonical skills when available.
 | `docs/PHASE_2_SUMMARY.md` | Ingestion pipeline |
 | `docs/PHASE_3_SUMMARY.md` | Skill taxonomy and enrichment |
 | `docs/PHASE_4_SUMMARY.md` | Embeddings, retrieval, hybrid ranking |
+| `docs/EVALUATION_GUIDE.md` | Relevance label definitions |
+| `docs/EVALUATION.md` | v1 ranking evaluation report |
+| `docs/PHASE_5_SUMMARY.md` | Offline evaluation framework |
 
 ---
 

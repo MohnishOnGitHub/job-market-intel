@@ -39,7 +39,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="Job Market Intel",
-        description="Résumé-to-job matching with a TF-IDF baseline and hybrid semantic ranking.",
+        description="Résumé-to-job matching with a TF-IDF baseline and explainable hybrid ranking.",
         version="0.1.0",
     )
 

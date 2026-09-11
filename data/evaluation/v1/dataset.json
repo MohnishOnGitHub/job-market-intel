@@ -1,0 +1,2430 @@
+{
+  "version": "v1",
+  "description": "Synthetic v1 ranking benchmark. Profiles and jobs are authored fixtures, not real applicants or live Adzuna rows. Labels follow the role-family/seniority rubric in docs/EVALUATION_GUIDE.md and do not use model scores.",
+  "split_strategy": "profile-level",
+  "labeling_method": "author-rubric-v1",
+  "binary_threshold": 2,
+  "resumes": [
+    {
+      "id": "r_da_junior",
+      "text": "SYNTHETIC PROFILE. Junior Data Analyst in Bengaluru. Two years of SQL, Excel, and Tableau reporting for a retail operations team. Built weekly dashboards, wrote ad-hoc queries against PostgreSQL, and cleaned CSV extracts in Python pandas. Comfortable with A/B readout slides and basic statistics. No Spark, Airflow, or production ML experience. Seeking a junior or early mid analytics role, not a platform engineering job.",
+      "profile": "Data Analyst",
+      "seniority": "junior",
+      "split": "validation",
+      "synthetic": true,
+      "preferred_location": "Bengaluru",
+      "preferred_experience": "junior",
+      "notes": "Synthetic junior analyst."
+    },
+    {
+      "id": "r_ds_mid",
+      "text": "SYNTHETIC PROFILE. Mid-level Data Scientist. Python, pandas, scikit-learn, and SQL for churn and propensity models. Experience with experiment design, feature stores at a small scale, and model monitoring notebooks. Some AWS SageMaker batch jobs. No large-scale Spark pipelines and limited deep learning. Prefers remote applied science roles rather than analytics-only dashboard work or backend API ownership.",
+      "profile": "Data Scientist",
+      "seniority": "mid",
+      "split": "validation",
+      "synthetic": true,
+      "preferred_location": "Remote",
+      "preferred_experience": "mid",
+      "notes": "Synthetic mid data scientist."
+    },
+    {
+      "id": "r_de_senior",
+      "text": "SYNTHETIC PROFILE. Senior Data Engineer. Designed batch and streaming platforms with Apache Spark, Kafka, Airflow, and dbt on Snowflake and GCP. Owned lakehouse modeling, data contracts, and on-call for ingestion SLAs. Mentored mid engineers. Python and SQL daily. Not looking for analyst dashboard work or research-scientist roles. Open to remote senior or lead data platform positions.",
+      "profile": "Data Engineer",
+      "seniority": "senior",
+      "split": "validation",
+      "synthetic": true,
+      "preferred_location": "Remote",
+      "preferred_experience": "senior",
+      "notes": "Synthetic senior data engineer."
+    },
+    {
+      "id": "r_mle_mid",
+      "text": "SYNTHETIC PROFILE. Mid Machine Learning Engineer in Bengaluru. Ships PyTorch training jobs, ONNX export, and FastAPI model services on AWS. Experience with feature pipelines, model registry, and CI for training. Comfortable with SQL and Docker. Less interested in Tableau reporting or pure Java backend. Looking for mid ML engineering or applied ML platform work.",
+      "profile": "Machine Learning Engineer",
+      "seniority": "mid",
+      "split": "validation",
+      "synthetic": true,
+      "preferred_location": "Bengaluru",
+      "preferred_experience": "mid",
+      "notes": "Synthetic mid ML engineer."
+    },
+    {
+      "id": "r_da_mid",
+      "text": "SYNTHETIC PROFILE. Mid Data Analyst moving toward analytics engineering. Strong SQL, dbt, Looker, and warehouse modeling on BigQuery. Partners with finance and growth teams. Light Python for analyses, no Spark clusters, no deep learning. Based around Pune and open to hybrid. Wants analytics engineer or mid analyst roles, not backend microservices.",
+      "profile": "Data Analyst / Analytics Engineer",
+      "seniority": "mid",
+      "split": "validation",
+      "synthetic": true,
+      "preferred_location": "Pune",
+      "preferred_experience": "mid",
+      "notes": "Synthetic mid analytics engineer."
+    },
+    {
+      "id": "r_de_mid",
+      "text": "SYNTHETIC PROFILE. Mid Data Engineer in Bengaluru. Builds Python and SQL ETL with Apache Spark, Airflow, and AWS (S3, Glue, Redshift). Has production on-call experience and unit-tested ingestion jobs. Some dbt. No NLP research and limited frontend work. Targeting mid data engineering roles in Bengaluru or remote data platform teams.",
+      "profile": "Data Engineer",
+      "seniority": "mid",
+      "split": "test",
+      "synthetic": true,
+      "preferred_location": "Bengaluru",
+      "preferred_experience": "mid",
+      "notes": "Synthetic mid data engineer. Held-out test profile."
+    },
+    {
+      "id": "r_ds_senior",
+      "text": "SYNTHETIC PROFILE. Senior Data Scientist focused on NLP. Fine-tuned transformer models, evaluation sets, and retrieval prototypes. Python, PyTorch, Hugging Face, and SQL. Has led a small applied-science pod. Weak Spark platform background. Seeking senior applied science or NLP roles, remote. Not targeting junior dashboard analyst seats.",
+      "profile": "Data Scientist",
+      "seniority": "senior",
+      "split": "test",
+      "synthetic": true,
+      "preferred_location": "Remote",
+      "preferred_experience": "senior",
+      "notes": "Synthetic senior NLP scientist. Held-out test profile."
+    },
+    {
+      "id": "r_be_mid",
+      "text": "SYNTHETIC PROFILE. Mid Backend Software Engineer in Hyderabad. Builds Python FastAPI services, PostgreSQL schemas, Redis caching, and Docker deployments. Writes integration tests and owns API latency. Some Kafka consumer work. Not a data warehouse modeler and not an ML researcher. Looking for mid backend or platform API roles.",
+      "profile": "Backend Software Engineer",
+      "seniority": "mid",
+      "split": "test",
+      "synthetic": true,
+      "preferred_location": "Hyderabad",
+      "preferred_experience": "mid",
+      "notes": "Synthetic mid backend engineer. Held-out test profile."
+    }
+  ],
+  "jobs": [
+    {
+      "id": 1,
+      "title": "Data Engineer",
+      "company": "Nimbus Labs",
+      "location": "Bengaluru",
+      "description": "Mid Data Engineer in Bengaluru. Build Python ETL, SQL models, Apache Spark jobs, and Airflow DAGs on AWS S3 and Redshift. Own data quality checks and on-call for failed pipelines. dbt welcome. Not a reporting-only analyst seat.",
+      "experience_level": "mid",
+      "posted_at": "2026-09-07T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Spark",
+        "Apache Airflow",
+        "dbt",
+        "Amazon Redshift",
+        "AWS",
+        "Amazon S3"
+      ],
+      "role_family": "de",
+      "notes": ""
+    },
+    {
+      "id": 2,
+      "title": "Senior Data Engineer",
+      "company": "Northwind Data",
+      "location": "Remote",
+      "description": "Senior Data Engineer, remote. Lead lakehouse work with Spark, Kafka, dbt, and Snowflake on GCP. Set data contracts and mentor engineers. Deep SQL and Python. No dashboard-only scope.",
+      "experience_level": "senior",
+      "posted_at": "2026-08-30T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Spark",
+        "Apache Kafka",
+        "dbt",
+        "Snowflake",
+        "GCP"
+      ],
+      "role_family": "de",
+      "notes": ""
+    },
+    {
+      "id": 3,
+      "title": "Junior Data Analyst",
+      "company": "Retail Insights",
+      "location": "Bengaluru",
+      "description": "Junior Data Analyst, Bengaluru. Write SQL and Excel analyses, publish Tableau dashboards, and support weekly business reviews. Python pandas is a plus. No requirement for Spark or Kubernetes.",
+      "experience_level": "junior",
+      "posted_at": "2026-09-04T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Spark",
+        "Kubernetes",
+        "Excel",
+        "Tableau",
+        "pandas"
+      ],
+      "role_family": "da",
+      "notes": ""
+    },
+    {
+      "id": 4,
+      "title": "Data Scientist",
+      "company": "Harbor Analytics",
+      "location": "Remote",
+      "description": "Remote Data Scientist. Python, scikit-learn, SQL, and experiment analysis. Ship batch scores and notebooks. Light AWS. Deep learning is optional.",
+      "experience_level": "mid",
+      "posted_at": "2026-09-02T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "scikit-learn",
+        "Deep Learning",
+        "AWS"
+      ],
+      "role_family": "ds",
+      "notes": ""
+    },
+    {
+      "id": 5,
+      "title": "Machine Learning Engineer",
+      "company": "Orchid ML",
+      "location": "Bengaluru",
+      "description": "Machine Learning Engineer, Bengaluru. Train PyTorch models, package them with Docker, and serve via FastAPI on AWS. SQL for features. MLOps basics expected.",
+      "experience_level": "mid",
+      "posted_at": "2026-09-05T00:00:00+00:00",
+      "skills": [
+        "SQL",
+        "Machine Learning",
+        "PyTorch",
+        "AWS",
+        "Docker",
+        "FastAPI"
+      ],
+      "role_family": "mle",
+      "notes": ""
+    },
+    {
+      "id": 6,
+      "title": "Backend Engineer",
+      "company": "Lotus Payments",
+      "location": "Hyderabad",
+      "description": "Backend Engineer, Hyderabad. Design Python FastAPI services, PostgreSQL schemas, and Docker deployments. Testing and code review required. Not a data science role.",
+      "experience_level": "mid",
+      "posted_at": "2026-09-06T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "PostgreSQL",
+        "Docker",
+        "FastAPI"
+      ],
+      "role_family": "be",
+      "notes": ""
+    },
+    {
+      "id": 7,
+      "title": "Senior Backend Engineer",
+      "company": "Cobalt Systems",
+      "location": "Hyderabad",
+      "description": "Senior Backend Engineer. Must have production Go and Java microservices, gRPC, and Kubernetes. Python is not the primary stack. Hyderabad office.",
+      "experience_level": "senior",
+      "posted_at": "2026-08-22T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "Java",
+        "Kubernetes"
+      ],
+      "role_family": "be",
+      "notes": ""
+    },
+    {
+      "id": 8,
+      "title": "Lead Data Engineer",
+      "company": "Atlas Freight",
+      "location": "Remote",
+      "description": "Lead Data Engineer. Set platform strategy for Spark, Kafka, and Iceberg. Manage a team, budget, and multi-year roadmap. Hands-on coding is secondary.",
+      "experience_level": "lead",
+      "posted_at": "2026-08-27T00:00:00+00:00",
+      "skills": [
+        "Apache Spark",
+        "Apache Kafka",
+        "Apache Iceberg"
+      ],
+      "role_family": "de",
+      "notes": ""
+    },
+    {
+      "id": 9,
+      "title": "Data Analyst Intern",
+      "company": "Campus Metrics",
+      "location": "Bengaluru",
+      "description": "Data Analyst intern. Learn SQL, Excel, and Tableau beside a mentor. No production pipeline ownership. Bengaluru, summer internship.",
+      "experience_level": "internship",
+      "posted_at": "2026-09-09T00:00:00+00:00",
+      "skills": [
+        "SQL",
+        "Excel",
+        "Tableau"
+      ],
+      "role_family": "da",
+      "notes": ""
+    },
+    {
+      "id": 10,
+      "title": "Analytics Engineer",
+      "company": "Brightline",
+      "location": "Pune",
+      "description": "Analytics Engineer, Pune. Model warehouse tables with dbt and SQL, publish Looker explores, and partner with data engineers. Python optional. No PyTorch.",
+      "experience_level": "mid",
+      "posted_at": "2026-09-03T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "dbt",
+        "PyTorch",
+        "Looker"
+      ],
+      "role_family": "analytics",
+      "notes": ""
+    },
+    {
+      "id": 11,
+      "title": "BI Developer",
+      "company": "Ledger Soft",
+      "location": "Pune",
+      "description": "BI Developer. Power BI, SQL, and dimensional models for finance dashboards. Excel power-user. Cloud warehouses nice to have.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-24T00:00:00+00:00",
+      "skills": [
+        "SQL",
+        "Excel",
+        "Power BI"
+      ],
+      "role_family": "da",
+      "notes": ""
+    },
+    {
+      "id": 12,
+      "title": "NLP Research Scientist",
+      "company": "Vector Institute Contract",
+      "location": "Remote",
+      "description": "NLP Research Scientist, remote. Publishable work on transformers, evaluation datasets, and error analysis. PyTorch and Hugging Face required. Production ETL is out of scope.",
+      "experience_level": "senior",
+      "posted_at": "2026-08-31T00:00:00+00:00",
+      "skills": [
+        "PyTorch",
+        "NLP",
+        "Hugging Face",
+        "Transformers"
+      ],
+      "role_family": "ds",
+      "notes": ""
+    },
+    {
+      "id": 13,
+      "title": "MLOps Engineer",
+      "company": "Forge Models",
+      "location": "Bengaluru",
+      "description": "MLOps Engineer, Bengaluru. CI/CD for training, model registry, feature store ops, and AWS GPU jobs. Python and Docker. Close partner to ML engineers.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-28T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "AWS",
+        "Feature Store",
+        "Docker",
+        "CI/CD"
+      ],
+      "role_family": "mle",
+      "notes": ""
+    },
+    {
+      "id": 14,
+      "title": "Data Engineer Intern",
+      "company": "PipeStart",
+      "location": "Bengaluru",
+      "description": "Data Engineer intern. Shadow Airflow and SQL jobs. Educational role, not on-call ownership. Bengaluru.",
+      "experience_level": "internship",
+      "posted_at": "2026-09-08T00:00:00+00:00",
+      "skills": [
+        "SQL",
+        "Apache Airflow"
+      ],
+      "role_family": "de",
+      "notes": ""
+    },
+    {
+      "id": 15,
+      "title": "Clinical Data Coordinator",
+      "company": "City Hospital",
+      "location": "Bengaluru",
+      "description": "Clinical Data Coordinator for hospital admissions. Maintain patient spreadsheets, schedule labs, and update the EHR. Some notes mention python sql report exports from a vendor tool. Night shifts. Not a software engineering role.",
+      "experience_level": null,
+      "posted_at": "2026-09-10T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL"
+      ],
+      "role_family": "other",
+      "notes": ""
+    },
+    {
+      "id": 16,
+      "title": "Registered Nurse",
+      "company": "City Hospital",
+      "location": "Bengaluru",
+      "description": "Registered Nurse, inpatient ward. Patient care, medication rounds, and handover. No programming requirements.",
+      "experience_level": null,
+      "posted_at": "2026-09-05T00:00:00+00:00",
+      "skills": [],
+      "role_family": "other",
+      "notes": ""
+    },
+    {
+      "id": 17,
+      "title": "Account Executive",
+      "company": "SaaS North",
+      "location": "Mumbai",
+      "description": "Account Executive selling B2B SaaS. Quota, demos, and CRM hygiene. No SQL or Python required.",
+      "experience_level": null,
+      "posted_at": "2026-09-01T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "NoSQL"
+      ],
+      "role_family": "other",
+      "notes": ""
+    },
+    {
+      "id": 18,
+      "title": "Product Manager",
+      "company": "Orbit Apps",
+      "location": "Remote",
+      "description": "Product Manager for a consumer app. Roadmaps, user interviews, and OKRs. Technical PM experience helpful but not a coding role.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-26T00:00:00+00:00",
+      "skills": [],
+      "role_family": "other",
+      "notes": ""
+    },
+    {
+      "id": 19,
+      "title": "Senior Data Scientist",
+      "company": "Helio Speech",
+      "location": "Remote",
+      "description": "Senior Data Scientist, speech and NLP. Transformers, evaluation, and mentoring. Python, PyTorch, SQL. Remote. Platform Spark work is limited.",
+      "experience_level": "senior",
+      "posted_at": "2026-08-29T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Spark",
+        "PyTorch",
+        "NLP",
+        "Transformers"
+      ],
+      "role_family": "ds",
+      "notes": ""
+    },
+    {
+      "id": 20,
+      "title": "Junior Data Engineer",
+      "company": "Kite Batch",
+      "location": "Bengaluru",
+      "description": "Junior Data Engineer, Bengaluru. Maintain Python and SQL jobs, learn Airflow, and fix AWS S3 path issues. Close mentoring. Spark is taught on the job.",
+      "experience_level": "junior",
+      "posted_at": "2026-09-02T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Spark",
+        "Apache Airflow",
+        "AWS",
+        "Amazon S3"
+      ],
+      "role_family": "de",
+      "notes": ""
+    },
+    {
+      "id": 21,
+      "title": "Data Analyst",
+      "company": "Market Basket",
+      "location": "Pune",
+      "description": "Data Analyst, Pune. SQL, Tableau, and stakeholder reporting. Some Python. No Kafka or Kubernetes.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-25T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Kafka",
+        "Kubernetes",
+        "Tableau"
+      ],
+      "role_family": "da",
+      "notes": ""
+    },
+    {
+      "id": 22,
+      "title": "Platform Engineer",
+      "company": "Mesh Cloud",
+      "location": "Hyderabad",
+      "description": "Platform Engineer. Kubernetes, Terraform, and service mesh. On-call for cluster upgrades. Python glue scripts only. Hyderabad.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-21T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "Kubernetes",
+        "Terraform"
+      ],
+      "role_family": "be",
+      "notes": ""
+    },
+    {
+      "id": 23,
+      "title": "Senior Analytics Engineer",
+      "company": "North Star BI",
+      "location": "Remote",
+      "description": "Senior Analytics Engineer, remote. Own dbt packages, Looker governance, and semantic-layer design. SQL expert. Mentors analysts.",
+      "experience_level": "senior",
+      "posted_at": "2026-08-23T00:00:00+00:00",
+      "skills": [
+        "SQL",
+        "dbt",
+        "Looker"
+      ],
+      "role_family": "analytics",
+      "notes": ""
+    },
+    {
+      "id": 24,
+      "title": "Senior Machine Learning Engineer",
+      "company": "Aero Vision",
+      "location": "Bengaluru",
+      "description": "Senior Machine Learning Engineer, Bengaluru. Lead PyTorch training, ranking models, and online inference. AWS and strong software practices.",
+      "experience_level": "senior",
+      "posted_at": "2026-08-20T00:00:00+00:00",
+      "skills": [
+        "Machine Learning",
+        "PyTorch",
+        "AWS"
+      ],
+      "role_family": "mle",
+      "notes": ""
+    },
+    {
+      "id": 25,
+      "title": "Data Engineer",
+      "company": "West End Retail",
+      "location": "Mumbai",
+      "description": "Data Engineer, Mumbai hybrid. Spark, Airflow, Python, SQL, and AWS. Similar stack to Bengaluru DE roles but different city.",
+      "experience_level": "mid",
+      "posted_at": "2026-09-03T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Spark",
+        "Apache Airflow",
+        "AWS"
+      ],
+      "role_family": "de",
+      "notes": ""
+    },
+    {
+      "id": 26,
+      "title": "Senior Backend Engineer",
+      "company": "Pagoda API",
+      "location": "Hyderabad",
+      "description": "Senior Backend Engineer, Hyderabad. Python, FastAPI, PostgreSQL, and system design. Owns high-traffic APIs. Mentors mid engineers.",
+      "experience_level": "senior",
+      "posted_at": "2026-08-17T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "PostgreSQL",
+        "FastAPI"
+      ],
+      "role_family": "be",
+      "notes": ""
+    },
+    {
+      "id": 27,
+      "title": "Quantitative Analyst",
+      "company": "Harbor Desk",
+      "location": "Remote",
+      "description": "Quantitative Analyst. Time-series models, Python, and SQL for a trading desk. Statistics heavy. Not a warehouse engineering role.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-14T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Statistics"
+      ],
+      "role_family": "ds",
+      "notes": ""
+    },
+    {
+      "id": 28,
+      "title": "DevOps Engineer",
+      "company": "Stackyard",
+      "location": "Hyderabad",
+      "description": "DevOps Engineer. AWS, Terraform, CI, and Linux. No data modeling and no ML.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-12T00:00:00+00:00",
+      "skills": [
+        "AWS",
+        "Terraform",
+        "Linux"
+      ],
+      "role_family": "other",
+      "notes": ""
+    },
+    {
+      "id": 29,
+      "title": "Marketing Data Intern",
+      "company": "AdBloom",
+      "location": "Bengaluru",
+      "description": "Marketing Data Intern, posted yesterday. Pull campaign CSVs, update Google Sheets, and write python sql snippets for UTM cleanup. Not a data platform role.",
+      "experience_level": "internship",
+      "posted_at": "2026-09-10T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL"
+      ],
+      "role_family": "other",
+      "notes": ""
+    },
+    {
+      "id": 30,
+      "title": "Junior Data Scientist",
+      "company": "Leaf Health",
+      "location": "Remote",
+      "description": "Junior Data Scientist, remote. SQL, Python, and scikit-learn with a mentor. No production MLOps ownership.",
+      "experience_level": "junior",
+      "posted_at": "2026-08-30T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "scikit-learn"
+      ],
+      "role_family": "ds",
+      "notes": ""
+    },
+    {
+      "id": 31,
+      "title": "Full Stack Engineer",
+      "company": "Canvas Web",
+      "location": "Hyderabad",
+      "description": "Full Stack Engineer. React, Node, and CSS. Some PostgreSQL. Not a data role.",
+      "experience_level": "mid",
+      "posted_at": "2026-08-28T00:00:00+00:00",
+      "skills": [
+        "PostgreSQL",
+        "React",
+        "CSS"
+      ],
+      "role_family": "be",
+      "notes": ""
+    },
+    {
+      "id": 32,
+      "title": "Data Engineer",
+      "company": "Slow River",
+      "location": "Bengaluru",
+      "description": "Data Engineer, Bengaluru. Python, SQL, Spark, Airflow, and AWS. Strong mid-level match on paper but the posting is six months old.",
+      "experience_level": "mid",
+      "posted_at": "2026-03-15T00:00:00+00:00",
+      "skills": [
+        "Python",
+        "SQL",
+        "Apache Spark",
+        "Apache Airflow",
+        "AWS"
+      ],
+      "role_family": "de",
+      "notes": ""
+    }
+  ],
+  "labels": [
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 1,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 2,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 3,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 4,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 5,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 6,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 7,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 8,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 9,
+      "relevance_label": 2,
+      "notes": "Internship is below junior, but same analyst family.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 10,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 11,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 12,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 13,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; Python/SQL mention is incidental.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 19,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 20,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 21,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 22,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 23,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 24,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 25,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 26,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 27,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 29,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 30,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 31,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_junior",
+      "job_id": 32,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 1,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 2,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 3,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 4,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 5,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 6,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 7,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 8,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 9,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 10,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 11,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 12,
+      "relevance_label": 2,
+      "notes": "Research scientist is adjacent; mid DS can be qualified with gaps.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 13,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; lexical bait.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 19,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 20,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 21,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 22,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 23,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 24,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 25,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 26,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 27,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 29,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 30,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 31,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_mid",
+      "job_id": 32,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 1,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 2,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 3,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 4,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 5,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 6,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 7,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 8,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 9,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 10,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 11,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 12,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 13,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; lexical bait.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 19,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 20,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 21,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 22,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 23,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 24,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 25,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 26,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 27,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 29,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 30,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 31,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_senior",
+      "job_id": 32,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 1,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 2,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 3,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 4,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 5,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 6,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 7,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 8,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 9,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 10,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 11,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 12,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 13,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; lexical bait.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 19,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 20,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 21,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 22,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 23,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 24,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 25,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 26,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 27,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 29,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 30,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 31,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_mle_mid",
+      "job_id": 32,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 1,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 2,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 3,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 4,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 5,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 6,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 7,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 8,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 9,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 10,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 11,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 12,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 13,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; lexical bait.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 19,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 20,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 21,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 22,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 23,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 24,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 25,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 26,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 27,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 29,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 30,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 31,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_da_mid",
+      "job_id": 32,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 1,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 2,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 3,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 4,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 5,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 6,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 7,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 8,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 9,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 10,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 11,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 12,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 13,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; lexical bait.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 19,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 20,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 21,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 22,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 23,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 24,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 25,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 26,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 27,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 29,
+      "relevance_label": 1,
+      "notes": "Fresh posting but marketing-ops intern work, not data engineering.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 30,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 31,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_de_mid",
+      "job_id": 32,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 1,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 2,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 3,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 4,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 5,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 6,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 7,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 8,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 9,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 10,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 11,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 12,
+      "relevance_label": 3,
+      "notes": "NLP research role matches senior transformer background.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 13,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; lexical bait.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 19,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 20,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 21,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 22,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 23,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 24,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 25,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 26,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 27,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 29,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 30,
+      "relevance_label": 1,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 31,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_ds_senior",
+      "job_id": 32,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 1,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 2,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 3,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 4,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 5,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 6,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 7,
+      "relevance_label": 1,
+      "notes": "Backend title but Go/Java stack, not the candidate's Python API work.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 8,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 9,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 10,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 11,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 12,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 13,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 14,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 15,
+      "relevance_label": 0,
+      "notes": "Clinical admin posting; lexical bait.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 16,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 17,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 18,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 19,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 20,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 21,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 22,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 23,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 24,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 25,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 26,
+      "relevance_label": 2,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 27,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 28,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 29,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 30,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 31,
+      "relevance_label": 3,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    },
+    {
+      "resume_id": "r_be_mid",
+      "job_id": 32,
+      "relevance_label": 0,
+      "notes": "Role-family and seniority rubric.",
+      "labeler": "author-v1"
+    }
+  ]
+}

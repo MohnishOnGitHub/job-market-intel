@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate job embeddings for semantic retrieval.
+"""Generate job embeddings for vector candidate retrieval.
 
   python scripts/generate_embeddings.py --all
   python scripts/generate_embeddings.py --only-missing
