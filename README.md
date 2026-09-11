@@ -1,234 +1,97 @@
-# Job Market Intelligence
+# Job Market Intel
 
-An end-to-end resume-to-job matching application that analyzes a candidate's PDF resume, extracts technical skills, compares it against job descriptions, and ranks jobs using TF-IDF and cosine similarity.
+An end-to-end résumé-to-job matching application. A user uploads a PDF résumé; the API extracts text and technical skills, compares the résumé to jobs stored in PostgreSQL, and returns a ranked list with matched and missing skills.
 
-The project combines **NLP-based text similarity, skill-gap analysis, PostgreSQL-backed job data, and a FastAPI backend** to help users understand both *which jobs match their profile* and *which skills they are missing*.
-
----
-
-## Why this project?
-
-Most job platforms return listings based on keywords or filters. This project explores a more candidate-centric workflow:
-
-1. Upload a resume as a PDF.
-2. Extract the resume text.
-3. Identify technical skills from the resume.
-4. Compare the resume with job descriptions using TF-IDF vectorization.
-5. Rank jobs by cosine similarity.
-6. Show matched and missing skills for each role.
-
-The goal is not just to return jobs, but to make the match **interpretable**.
+This repository is a Phase 1 modular FastAPI MVP. Later phases (ingestion adapters, skill taxonomy, embeddings, evaluation, and market analytics) are specified in `docs/PRD.md` and `docs/DESIGN.md` and are **not implemented yet**.
 
 ---
 
-## Core Features
+## What it does today
 
-- **PDF resume parsing** using `PyPDF2`
-- **Skill extraction** from resume and job descriptions
-- **TF-IDF vectorization** for resume/job text representation
-- **Cosine similarity** for job-match ranking
-- **Skill-gap analysis** showing missing skills per job
-- **PostgreSQL integration** for job storage and retrieval
-- **FastAPI backend** for resume upload and scoring
-- **Ranked job recommendations** sorted by resume similarity
-- **API test coverage** for the backend workflow
+1. Accept a PDF résumé at `POST /upload-resume`.
+2. Extract text in memory with PyPDF2.
+3. Detect skills with boundary-aware matching against a fixed 21-skill list.
+4. Load jobs from PostgreSQL.
+5. Score every job with pairwise TF-IDF cosine similarity plus skill overlap.
+6. Return jobs sorted by `hybrid_score`.
+
+It does **not** yet ingest jobs automatically, embed documents, search with pgvector, or compute market analytics.
 
 ---
 
-## System Workflow
+## Current architecture
 
 ```text
-                Resume PDF
-                    |
-                    v
-             PDF Text Extraction
-                    |
-                    v
-              Skill Extraction
-                    |
-                    +--------------------+
-                    |                    |
-                    v                    v
-             Resume Skills        Resume Text
-                                         |
-                                         |
-                         PostgreSQL Job Listings
-                                         |
-                                         v
-                              Job Description Text
-                                         |
-                                         v
-                              TF-IDF Vectorization
-                                         |
-                                         v
-                               Cosine Similarity
-                                         |
-                    +--------------------+--------------------+
-                    |                                         |
-                    v                                         v
-              Match Score                              Skill Comparison
-                                                               |
-                                                               v
-                                                   Matched / Missing Skills
-                    \                                         /
-                     \                                       /
-                      +-------------------------------------+
-                                      |
-                                      v
-                              Ranked Job Results
+frontend/index.html
+        |
+        v
+   FastAPI (app/main.py)
+        |
+        +-- services/resume_parser.py
+        +-- services/skill_extractor.py
+        +-- services/ranking.py
+        +-- db/repositories/jobs.py --> PostgreSQL
 ```
+
+Business logic lives in services. Route handlers do not talk to PostgreSQL directly. Configuration is loaded from environment variables.
 
 ---
 
-## Tech Stack
+## Current ranking formula
 
-| Layer | Technology |
-|---|---|
-| Backend | FastAPI |
-| Language | Python |
-| Database | PostgreSQL |
-| NLP / Matching | scikit-learn |
-| Vectorization | TF-IDF |
-| Similarity | Cosine Similarity |
-| PDF Processing | PyPDF2 |
-| Database Driver | psycopg2 |
-| Configuration | python-dotenv |
+```text
+match_score  = pairwise TF-IDF cosine(resume_text, job_description)
+skill_score  = |matched_skills| / |job_skills|   if job_skills else 0
+hybrid_score = 0.7 * match_score + 0.3 * skill_score
+```
+
+Results are sorted by `hybrid_score` descending.
+
+`match_score` fits a new TF-IDF vectorizer on exactly two documents (the résumé and one job). This is the working lexical baseline. It is not corpus-level TF-IDF.
+
+If a job has no extracted skills, `skill_score` is `0`. That demotes those jobs relative to jobs with overlapping skills. This is a documented limitation, not a tuned ranking policy.
+
+These weights are an un-evaluated heuristic. They are not a hiring probability.
 
 ---
 
-## Matching Approach
+## Requirements
 
-### 1. Resume Parsing
-
-The uploaded PDF is converted into lowercase text using `PyPDF2`.
-
-### 2. Skill Extraction
-
-The application compares the parsed text against a curated technical skill vocabulary.
-
-Example skills include:
-
-```text
-Python, SQL, Machine Learning, Deep Learning,
-FastAPI, Pandas, NumPy, AWS, Docker,
-Kubernetes, Spark, Hadoop
-```
-
-### 3. Text Similarity
-
-For every job description, the application creates TF-IDF vectors for:
-
-```text
-resume text
-job description
-```
-
-It then calculates:
-
-```text
-cosine_similarity(resume_vector, job_vector)
-```
-
-The resulting score represents textual similarity between the candidate's resume and the role.
-
-### 4. Skill-Gap Analysis
-
-For each job:
-
-```text
-matched_skills = resume_skills ∩ job_skills
-missing_skills = job_skills - resume_skills
-```
-
-This provides a simple explanation for why a role does or does not match the candidate.
+- Python 3.10+ recommended (`runtime.txt` specifies 3.10.13). Python 3.9 can run the current test suite.
+- PostgreSQL
+- A `jobs` table (see below)
 
 ---
 
-## API
-
-### `POST /upload-resume`
-
-Uploads a PDF resume and returns jobs ranked by similarity.
-
-Example response:
-
-```json
-{
-  "jobs": [
-    {
-      "id": 12,
-      "title": "Data Analyst",
-      "company": "Example Corp",
-      "location": "Bengaluru",
-      "match_score": 0.61,
-      "skill_score": 0.57,
-      "skills": ["python", "sql", "pandas"],
-      "missing_skills": ["spark"]
-    }
-  ]
-}
-```
-
-> Note: the current implementation also contains an experimental `improved_score` field. It is a prototype value and should not be interpreted as a learned or production-grade ranking metric.
-
----
-
-## Project Structure
-
-```text
-job-market-intel/
-├── main.py              # FastAPI application and matching pipeline
-├── skills.py            # Curated technical skill vocabulary
-├── test_api.py          # API tests
-├── index.html           # Front-end interface
-├── requirements.txt     # Python dependencies
-├── runtime.txt          # Runtime configuration
-├── readme.txt           # Legacy run instructions
-└── .gitignore
-```
-
----
-
-## Getting Started
-
-### 1. Clone the repository
+## Setup
 
 ```bash
 git clone https://github.com/MohnishOnGitHub/job-market-intel.git
 cd job-market-intel
-```
 
-### 2. Create a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 
-macOS / Linux:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-Windows:
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-### 3. Install dependencies
-
-```bash
 pip install -r requirements.txt
+cp .env.example .env
 ```
 
-### 4. Configure PostgreSQL
+Edit `.env` and set a real `DATABASE_URL`. Do not commit `.env`.
 
-Create a `.env` file:
+### Environment variables
 
-```env
-DATABASE_URL=postgresql://username:password@localhost:5432/job_market
-```
+| Variable | Required | Purpose |
+|---|---|---|
+| `DATABASE_URL` | Yes, for matching | PostgreSQL connection string |
+| `APP_ENV` | No (default `development`) | Environment name |
+| `LOG_LEVEL` | No (default `INFO`) | Logging level |
+| `MAX_UPLOAD_MB` | No (default `5`) | Résumé upload size limit |
+| `ADZUNA_APP_ID` | Only for the manual loader | Adzuna API id |
+| `ADZUNA_APP_KEY` | Only for the manual loader | Adzuna API key |
 
-The database should contain a `jobs` table with at least:
+### PostgreSQL table
+
+Matching reads:
 
 ```sql
 CREATE TABLE jobs (
@@ -240,171 +103,111 @@ CREATE TABLE jobs (
 );
 ```
 
-### 5. Run the API
+The optional Adzuna loader also writes `created_at`. Matching does not use that column. `ON CONFLICT DO NOTHING` in the loader only skips duplicates if a unique constraint exists.
+
+---
+
+## Run the API
 
 ```bash
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
-The API will be available at:
+`uvicorn main:app --reload` also works (compatibility shim).
 
-```text
-http://127.0.0.1:8000
-```
+- API: http://127.0.0.1:8000
+- Docs: http://127.0.0.1:8000/docs
+- Health: http://127.0.0.1:8000/health
+- Frontend: http://127.0.0.1:8000/ or open `frontend/index.html`
 
-FastAPI documentation:
-
-```text
-http://127.0.0.1:8000/docs
-```
+The app can import and serve `/health` without `DATABASE_URL`. Matching and `/jobs` return HTTP 503 until the database is configured.
 
 ---
 
-## Example Use Case
+## Run tests
 
-Suppose a resume contains:
-
-```text
-Python
-SQL
-Pandas
-Machine Learning
-FastAPI
+```bash
+pytest
 ```
 
-and a Data Engineer role requires:
-
-```text
-Python
-SQL
-Spark
-AWS
-Docker
-```
-
-The system can identify:
-
-```text
-Matched:
-Python
-SQL
-
-Missing:
-Spark
-AWS
-Docker
-```
-
-while independently calculating a TF-IDF similarity score using the complete resume and job-description text.
-
-This makes the recommendation more interpretable than a single unexplained score.
+Tests do not call Adzuna or a production database. Matching API tests use a mocked job repository.
 
 ---
 
-## Current Limitations
+## API
 
-This repository represents an early version of the system.
+### `GET /health`
 
-Current limitations include:
+```json
+{"status": "ok"}
+```
 
-- Skill extraction uses dictionary matching rather than entity recognition.
-- TF-IDF does not capture semantic similarity between differently worded concepts.
-- Job retrieval currently scores every stored job rather than using a retrieval stage.
-- Skill importance is not weighted by role or seniority.
-- PDF extraction depends on selectable PDF text.
-- Ranking has not yet been evaluated against a labeled relevance dataset.
-- The current experimental `improved_score` is heuristic rather than model-derived.
+### `GET /jobs`
 
-Documenting these limitations is intentional: they define the path toward a stronger production-grade matching system.
+Lists stored jobs. Requires `DATABASE_URL`.
+
+### `POST /upload-resume`
+
+Multipart field: `file` (PDF).
+
+```json
+{
+  "jobs": [
+    {
+      "id": 12,
+      "title": "Data Analyst",
+      "company": "Example Corp",
+      "location": "Bengaluru",
+      "match_score": 0.61,
+      "skill_score": 0.57,
+      "hybrid_score": 0.598,
+      "skills": ["python", "sql", "pandas"],
+      "matched_skills": ["python", "sql"],
+      "missing_skills": ["pandas"]
+    }
+  ]
+}
+```
+
+`improved_score`, `tfidf_score`, and `projected_score` are not returned.
 
 ---
 
-## Future Improvements
+## Manual Adzuna loader
 
-### Semantic Retrieval
+`scripts/ingest_adzuna.py` is a one-shot loader, not a test.
 
-Replace or complement TF-IDF with sentence/document embeddings.
-
-Potential architecture:
-
-```text
-Resume
-   |
-Embedding Model
-   |
-   v
-Vector Search
-   |
-Candidate Jobs
-   |
-Reranker
-   |
-Final Ranking
+```bash
+python scripts/ingest_adzuna.py
 ```
 
-### Better Skill Extraction
-
-Move from direct substring matching toward:
-
-- NLP entity extraction
-- skill normalization
-- aliases and synonyms
-- taxonomy-based matching
-
-For example:
-
-```text
-Postgres -> PostgreSQL
-sklearn  -> scikit-learn
-ML       -> Machine Learning
-```
-
-### Hybrid Ranking
-
-Combine:
-
-- semantic similarity
-- skill overlap
-- experience level
-- location preferences
-- job-title similarity
-
-### Evaluation
-
-Create a labeled resume/job relevance dataset and measure:
-
-- Precision@K
-- Recall@K
-- NDCG
-- Mean Reciprocal Rank
-
-### Production Engineering
-
-Potential additions:
-
-- Docker
-- CI/CD
-- database migrations
-- structured logging
-- validation
-- caching
-- vector database / pgvector
-- deployment monitoring
+It requires `DATABASE_URL`, `ADZUNA_APP_ID`, and `ADZUNA_APP_KEY`. Do not run it unless you intend to write to your local database.
 
 ---
 
-## What I Learned
+## Known limitations
 
-This project was built to explore several practical problems in data science and backend engineering:
+- Skill extraction uses a fixed 21-item list, not a taxonomy with aliases (`postgres` will not become `PostgreSQL`).
+- Matching is boundary-aware, so `sql` is not inferred from `PostgreSQL` / `MySQL` / `NoSQL`, and `aws` is not inferred from `laws`.
+- Jobs with no extracted skills receive `skill_score = 0`.
+- Pairwise TF-IDF is a weak lexical baseline and is scored in Python for every job.
+- PDF extraction requires selectable text. Scanned image PDFs fail.
+- Ranking has not been evaluated against a labeled relevance dataset.
+- The Adzuna loader is not a production ingestion pipeline and does not guarantee deduplication.
+- A previous version of this repository committed a plaintext database password. That credential must be rotated outside git. History was not rewritten.
 
-- converting unstructured resume data into usable features
-- comparing documents using TF-IDF
-- ranking results using cosine similarity
-- identifying explainable skill gaps
-- serving an NLP workflow through FastAPI
-- connecting application logic to PostgreSQL data
+---
 
-It also highlighted an important limitation of traditional lexical matching: two documents can be semantically similar even when they use different terminology. That naturally motivates the next stage of the system—embedding-based retrieval and more robust ranking.
+## Project documents
+
+| Document | Role |
+|---|---|
+| `docs/PRD.md` | Product requirements |
+| `docs/DESIGN.md` | Target architecture |
+| `docs/PHASE_0_AUDIT.md` | Pre-refactor audit of the MVP |
+| `docs/PHASE_1_SUMMARY.md` | What Phase 1 changed |
+
+Roadmap (not yet built): Phase 2 ingestion and history, Phase 3 skill intelligence, Phase 4 semantic retrieval and hybrid ranking, Phase 5 evaluation, Phase 6 market analytics, Phase 7 product polish.
 
 ---
 

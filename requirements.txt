@@ -1,6 +1,13 @@
-fastapi
-uvicorn
-psycopg2-binary
-scikit-learn
-python-dotenv
-PyPDF2
+# Runtime
+fastapi>=0.110.0
+uvicorn>=0.27.0
+psycopg2-binary>=2.9.9
+scikit-learn>=1.3.0
+python-dotenv>=1.0.0
+PyPDF2>=3.0.0
+python-multipart>=0.0.9
+requests>=2.31.0
+
+# Tests
+pytest>=8.0.0
+httpx>=0.27.0

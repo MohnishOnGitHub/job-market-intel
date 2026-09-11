@@ -111,6 +111,18 @@
 
 <script>
 
+let matchChart = null;
+
+function scoreMessage(data) {
+    if (typeof data.detail === "string") {
+        return data.detail;
+    }
+    if (Array.isArray(data.detail)) {
+        return "The upload could not be processed.";
+    }
+    return "Matching failed.";
+}
+
 async function uploadResume() {
     const fileInput = document.getElementById("resume");
     const file = fileInput.files[0];
@@ -130,6 +142,11 @@ async function uploadResume() {
 
     const data = await res.json();
 
+    if (!res.ok || !data.jobs) {
+        alert(scoreMessage(data));
+        return;
+    }
+
     const resultsDiv = document.getElementById("results");
     resultsDiv.innerHTML = "";
 
@@ -137,33 +154,36 @@ async function uploadResume() {
         const div = document.createElement("div");
         div.className = "job";
 
-        const skillsHTML = job.skills.map(s =>
+        const skillsHTML = (job.skills || []).map(s =>
             `<span class="skill-tag">${s}</span>`
         ).join("");
 
-        const missingHTML = job.missing_skills.length > 0
+        const matchedHTML = (job.matched_skills || []).length > 0
+            ? `<p><b>Matched:</b> ${job.matched_skills.join(", ")}</p>`
+            : "";
+
+        const missingHTML = (job.missing_skills || []).length > 0
             ? `<p style="color:#facc15;"><b>Improve:</b> ${job.missing_skills.join(", ")}</p>`
             : "";
+
+        const hybrid = job.hybrid_score;
 
         div.innerHTML = `
             <h3>${job.title}</h3>
             <p><b>${job.company}</b> • ${job.location}</p>
 
-            <p><b>Match Score:</b> ${job.match_score}</p>
+            <p><b>Hybrid Score:</b> ${hybrid}</p>
             <div class="bar">
-                <div class="bar-fill" style="width:${job.match_score * 100}%"></div>
+                <div class="bar-fill" style="width:${hybrid * 100}%"></div>
             </div>
 
-            <p>TF-IDF: ${job.tfidf_score}</p>
+            <p>TF-IDF: ${job.match_score}</p>
             <p>Skill Score: ${job.skill_score}</p>
 
             <div>${skillsHTML}</div>
 
+            ${matchedHTML}
             ${missingHTML}
-
-            <p style="color:#38bdf8;">
-                <b>Potential Score:</b> ${job.projected_score}
-            </p>
 
             <button onclick='viewJob(${JSON.stringify(job)})'>View Details</button>
         `;
@@ -171,37 +191,42 @@ async function uploadResume() {
         resultsDiv.appendChild(div);
     });
 
-    // 📊 CHART
     const labels = data.jobs.map(job => job.title);
-    const scores = data.jobs.map(job => job.match_score);
+    const scores = data.jobs.map(job => job.hybrid_score);
 
     const ctx = document.getElementById("chart").getContext("2d");
+    if (matchChart) {
+        matchChart.destroy();
+    }
 
-    new Chart(ctx, {
+    matchChart = new Chart(ctx, {
         type: "bar",
         data: {
             labels: labels,
             datasets: [{
-                label: "Match Score",
+                label: "Hybrid Score",
                 data: scores
             }]
         }
     });
 }
 
-// 📄 MODAL
 function viewJob(job) {
     const modal = document.getElementById("modal");
     const content = document.getElementById("modal-content");
+    const matched = (job.matched_skills || []).join(", ");
+    const missing = (job.missing_skills || []).join(", ");
 
     content.innerHTML = `
         <h2>${job.title}</h2>
         <p><b>Company:</b> ${job.company}</p>
         <p><b>Location:</b> ${job.location}</p>
-        <p><b>Match Score:</b> ${job.match_score}</p>
-        <p><b>Potential Score:</b> ${job.projected_score}</p>
-        <p><b>Skills:</b> ${job.skills.join(", ")}</p>
-        <p style="color:#facc15;"><b>Improve:</b> ${job.missing_skills.join(", ")}</p>
+        <p><b>Hybrid Score:</b> ${job.hybrid_score}</p>
+        <p><b>TF-IDF:</b> ${job.match_score}</p>
+        <p><b>Skill Score:</b> ${job.skill_score}</p>
+        <p><b>Skills:</b> ${(job.skills || []).join(", ")}</p>
+        <p><b>Matched:</b> ${matched}</p>
+        <p style="color:#facc15;"><b>Improve:</b> ${missing}</p>
         <br>
         <button onclick="closeModal()">Close</button>
     `;

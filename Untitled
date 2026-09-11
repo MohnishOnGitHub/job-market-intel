@@ -1,0 +1,52 @@
+Please make a small, focused cleanup to the scoring logic in this repo.
+
+Goal:
+Replace the current fake `improved_score` logic with a real hybrid ranking score that combines TF-IDF text similarity and skill overlap.
+
+Requirements:
+
+1. In `main.py`, find the current logic similar to:
+
+   skill_score = len(matched_skills) / (len(job_skills) + 1)
+
+   improved_score = round(min(match_score + 0.15, 1), 2)
+
+2. Replace the skill score with:
+
+   skill_score = (
+       len(matched_skills) / len(job_skills)
+       if job_skills
+       else 0
+   )
+
+3. Add a hybrid score:
+
+   hybrid_score = round(
+       0.7 * match_score +
+       0.3 * skill_score,
+       3
+   )
+
+4. Replace the response field:
+
+   "improved_score": improved_score
+
+   with:
+
+   "hybrid_score": hybrid_score
+
+5. Change ranking so results are sorted by `hybrid_score` descending instead of only `match_score`.
+
+6. Do not change unrelated code or restructure the project.
+
+7. Update any tests that break because of the renamed field or ranking change.
+
+8. Run the existing tests if possible.
+
+9. At the end, show me:
+   - files changed
+   - concise summary of changes
+   - test results
+   - `git diff --stat`
+
+Do not commit anything.
