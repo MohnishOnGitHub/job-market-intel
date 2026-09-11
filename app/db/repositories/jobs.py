@@ -79,9 +79,21 @@ class JobRepository:
         return jobs
 
     def get_job(self, job_id: int) -> Optional[Job]:
-        for job in self.list_jobs():
-            if job.id == job_id:
-                return job
+        detail = self.get_job_detail(job_id)
+        if detail is None:
+            return None
+        return Job(
+            id=detail["id"],
+            title=detail["title"],
+            company=detail["company"],
+            location=detail["location"],
+            description=detail["description"],
+            persisted_skills=detail["skill_names"] or None,
+            experience_level=detail["experience_level"],
+            posted_at=detail["posted_at"],
+        )
+
+    def get_job_detail(self, job_id: int) -> Optional[dict]:
         try:
             with self._conn() as conn:
                 with conn.cursor() as cursor:
@@ -93,10 +105,24 @@ class JobRepository:
                             j.company,
                             COALESCE(j.location_normalized, j.location_raw),
                             j.description,
+                            j.source,
+                            j.source_url,
+                            j.employment_type,
                             j.experience_level,
-                            j.posted_at
+                            j.salary_min,
+                            j.salary_max,
+                            j.salary_currency,
+                            j.posted_at,
+                            COALESCE(
+                                ARRAY_AGG(s.canonical_name ORDER BY s.id)
+                                FILTER (WHERE s.canonical_name IS NOT NULL),
+                                ARRAY[]::text[]
+                            ) AS skill_names
                         FROM jobs j
+                        LEFT JOIN job_skills js ON js.job_id = j.id
+                        LEFT JOIN skills s ON s.id = js.skill_id
                         WHERE j.id = %s
+                        GROUP BY j.id
                         """,
                         (job_id,),
                     )
@@ -107,15 +133,22 @@ class JobRepository:
             raise DatabaseUnavailableError("Database is unavailable.") from exc
         if row is None:
             return None
-        return Job(
-            id=row[0],
-            title=row[1],
-            company=row[2],
-            location=row[3],
-            description=row[4] or "",
-            experience_level=row[5],
-            posted_at=row[6],
-        )
+        return {
+            "id": row[0],
+            "title": row[1],
+            "company": row[2],
+            "location": row[3],
+            "description": row[4] or "",
+            "source": row[5],
+            "source_url": row[6],
+            "employment_type": row[7],
+            "experience_level": row[8],
+            "salary_min": float(row[9]) if row[9] is not None else None,
+            "salary_max": float(row[10]) if row[10] is not None else None,
+            "salary_currency": row[11],
+            "posted_at": row[12],
+            "skill_names": list(row[13] or []),
+        }
 
     def list_jobs_for_enrichment(
         self,

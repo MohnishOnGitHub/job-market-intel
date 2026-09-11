@@ -1,254 +1,129 @@
 # Job Market Intel
 
-An end-to-end résumé-to-job matching application. A user uploads a PDF résumé; the API extracts text and technical skills, compares the résumé to jobs stored in PostgreSQL, and returns a ranked list with matched and missing skills.
+A job-market intelligence app: ingest Adzuna postings, measure skill demand in SQL, and rank jobs against a résumé with explainable scores.
 
-This repository is a Phase 5 modular FastAPI application: matching, Adzuna ingestion, a curated skill taxonomy, job-skill enrichment, skill-demand analytics, embedding generation, pgvector candidate retrieval, an explainable hybrid ranker, and an offline ranking evaluation fixture.
+## What it does
 
----
+1. **Market intelligence** — active jobs, skill demand, category mix, experience, locations, companies, and posting age.
+2. **Résumé matching** — upload a PDF and compare the pairwise TF-IDF baseline with a structured hybrid ranker.
+3. **Evaluation** — a committed 256-judgment fixture reports directional ranking quality.
 
-## Implemented now
-
-1. Upload a PDF résumé at `POST /upload-resume` for the TF-IDF lexical baseline.
-2. Extract canonical skills from a curated taxonomy (`data/taxonomy/skills.yml`).
-3. Ingest jobs from Adzuna, normalize, deduplicate, and upsert into PostgreSQL.
-4. Persist job-skill relationships and compute skill-demand shares in SQL.
-5. Generate job embeddings and retrieve a candidate set with pgvector.
-6. Rerank candidates with a hybrid score and per-component explanation (`POST /api/v1/matches`).
-7. Evaluate rankers offline on a committed labeled fixture (`python scripts/evaluate_ranking.py`).
-
-## Roadmap / future work
-
-Not built yet: historical trend claims, skill-gap frequency product, Docker Compose app stack, CI.
-
----
+Open http://127.0.0.1:8000 after ingesting jobs. The UI uses same-origin APIs.
 
 ## Architecture
 
 ```text
-Adzuna adapter
-    -> RawJob -> normalize -> dedupe -> jobs upsert
-    -> best-effort skill enrichment -> job_skills
-    -> best-effort embedding generation -> job_embeddings
+Adzuna → normalize → dedupe → PostgreSQL jobs
+       → job_skills (taxonomy)
+       → job_embeddings (optional pgvector)
 
-Resume
-    -> embedding
-    -> pgvector candidate retrieval (or in-memory fallback)
-    -> structured features (semantic, skills, recency, location, experience)
-    -> hybrid ranker
-    -> explainable ranked jobs
-
-POST /upload-resume still uses the independent TF-IDF baseline.
+Browser
+  Market  → /api/v1/analytics/*
+  Match   → POST /upload-resume  or  POST /api/v1/matches/upload
+  Eval    → static measured Phase 5 numbers
 ```
 
-Matching uses persisted `job_skills` when present and falls back to live extraction for jobs that have not been enriched.
+hashing-v1 is **lexical hashing retrieval**. sentence-transformers, when installed, are **semantic embeddings**. Hybrid is a **structured weighted ranker**. TF-IDF is the **pairwise lexical baseline**.
 
----
+## Demo / screenshots
 
-## Ranking
+The dashboard is laid out for four later screenshots: market overview, skill-demand table/chart, résumé results, and score breakdown. This repository does not include generated screenshots.
 
-Two rankers are available. Neither score is a hiring probability.
+## Market intelligence
 
-### TF-IDF baseline (`rank_tfidf` / `POST /upload-resume`)
+Filters: title contains, location contains, optional stored experience level.
 
-Unchanged from Phase 1:
-
-```text
-match_score  = pairwise TF-IDF cosine(resume_text, job_description)
-skill_score  = |matched_skills| / |job_skills|   if job_skills else 0
-hybrid_score = 0.7 * match_score + 0.3 * skill_score
-```
-
-Pairwise TF-IDF fits a new vectorizer on exactly two documents. This is intentional and is not corpus-level TF-IDF.
-
-### Hybrid ranker (`POST /api/v1/matches`)
-
-```text
-hybrid_score =
-  w_semantic   * semantic_score +
-  w_skill      * skill_score +
-  w_experience * experience_score +
-  w_recency    * recency_score +
-  w_location   * location_score
-```
-
-Default weights (from DESIGN.md, not empirically tuned): `0.50 / 0.25 / 0.10 / 0.10 / 0.05`. Weights are normalized to sum to 1. Location and experience are used only when the request includes a preference; those weights are then dropped and the rest are renormalized.
-
-| Signal | Range | Rule |
-|---|---|---|
-| embedding (`semantic` field) | 0–1 | Cosine of résumé and job vectors, clipped to `[0, 1]`. With the default `hashing-v1` provider this is **lexical hashing**, not sentence-transformer semantics. |
-| skills | 0–1 | `matched / job_skills`, else `0` |
-| recency | 0–1 | `exp(-age_days / 30)`; missing `posted_at` is `0.5` |
-| experience | 0–1 | Explicit levels only: internship → lead; missing job level is `0.5` |
-| location | 0–1 | Exact `1.0`, substring/hybrid `0.5`, mismatch `0.0`; missing job location is `0.5` |
-
-If stored vectors exist for the current model, candidates are retrieved with pgvector (`ORDER BY embedding <=> query LIMIT N`). The ranker then scores only that candidate set. If no vectors exist, all active jobs are scored in memory with the same embedding provider. That fallback is documented and is not used once embeddings are stored.
-
----
-
-## Requirements
-
-- Python 3.10+ recommended (`runtime.txt` specifies 3.10.13). Python 3.9 can run the current test suite.
-- PostgreSQL with the [pgvector](https://github.com/pgvector/pgvector) extension
-
----
-
-## Setup
-
-```bash
-git clone https://github.com/MohnishOnGitHub/job-market-intel.git
-cd job-market-intel
-
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-
-pip install -r requirements.txt
-cp .env.example .env
-```
-
-Edit `.env`. Do not commit `.env`.
-
-### Environment variables
-
-| Variable | Required | Purpose |
-|---|---|---|
-| `DATABASE_URL` | Yes, for matching and ingestion | PostgreSQL connection string |
-| `APP_ENV` | No (default `development`) | Environment name |
-| `LOG_LEVEL` | No (default `INFO`) | Logging level |
-| `MAX_UPLOAD_MB` | No (default `5`) | Résumé upload size limit |
-| `ADZUNA_APP_ID` | Yes, for ingestion | Adzuna application id |
-| `ADZUNA_APP_KEY` | Yes, for ingestion | Adzuna application key |
-| `ADZUNA_COUNTRY` | No (default `in`) | Adzuna country code |
-| `EMBEDDING_PROVIDER` | No (default `hashing`) | `hashing` or `sentence-transformers` |
-| `EMBEDDING_MODEL` | No (default `all-MiniLM-L6-v2`) | Model name when using sentence-transformers |
-| `EMBEDDING_DIMENSION` | No (default `256`) | Hashing-vector size |
-| `CANDIDATE_COUNT` | No (default `100`) | pgvector retrieval depth |
-| `RECENCY_TAU_DAYS` | No (default `30`) | Recency decay constant |
-| `RANK_WEIGHT_*` | No | Hybrid weights; normalized if they do not sum to 1 |
-
----
-
-## Database setup and migrations
-
-Migrations are numbered SQL files under `app/db/migrations/`, applied by a small runner that records versions in `schema_migrations`. Alembic is not used: the project has no ORM.
-
-```bash
-python scripts/migrate.py
-# or
-python -m app.db.migrate
-```
-
-This creates:
-
-- `jobs` — canonical job records
-- `ingestion_runs` — per-run metrics
-- `skills`, `skill_aliases`, `job_skills` — taxonomy and enrichment
-- `job_embeddings` — one vector per job and embedding model
-- `schema_migrations` — applied versions
-
-Migration `005_job_embeddings.sql` runs `CREATE EXTENSION vector`. PostgreSQL must have pgvector installed. Test containers use `pgvector/pgvector:pg16`.
-
-If a Phase 1 `jobs` table exists (no `source` column), it is renamed to `jobs_legacy` and rows with both title and description are copied. Incomplete legacy rows are not invented.
-
-### Job lifecycle fields
-
-| Field | Meaning |
+| View | Meaning |
 |---|---|
-| `first_seen_at` | Set on insert; never overwritten |
-| `last_seen_at` | Updated every time the source job is seen |
-| `active` | Defaults to true on ingest; repository can set false |
-| `content_hash` | SHA-256 of normalized title, company, description, location |
-| `source` + `source_job_id` | Primary deterministic identity |
-| `source` + `source_url` | Secondary identity when present |
+| Active jobs | Filtered `active = TRUE` rows |
+| Jobs with skill data | Active jobs with ≥1 `job_skills` row |
+| Skill share | Jobs containing the skill / filtered active jobs |
+| Categories | Jobs with ≥1 skill in that category |
+| Experience | Stored `experience_level` only; blanks are `unknown` |
+| Locations | `COALESCE(location_normalized, location_raw)` strings, not geocodes |
+| Freshness | `posted_at` age buckets, including unknown |
 
-Jobs are **not** marked inactive just because one Adzuna request omitted them. That request is a subset of the market. Automatic deactivation is deferred.
+Definitions: `docs/METRICS.md`. No growth or forecast claims.
 
----
+## Résumé matching
 
-## Ingestion
+- **Pairwise TF-IDF baseline** — `POST /upload-resume`
+- **Lexical vector + structured hybrid** — default hashing-v1 via `POST /api/v1/matches/upload`
+- **Semantic + structured hybrid** — only if `EMBEDDING_PROVIDER=sentence-transformers`
 
-```bash
-python scripts/ingest_adzuna.py --query "python developer" --country in --location bangalore --pages 1
+Cards show match score, method, matched/missing skills, and component bars. Unused location or experience preferences display as **N/A**, not 0. The score is not a hiring probability. The PDF is parsed in memory and not stored.
+
+## Ranking systems
+
+```text
+TF-IDF:  0.7 * pairwise cosine + 0.3 * skill overlap
+Hybrid:  0.50 * similarity + 0.25 * skills + 0.10 * experience + 0.10 * recency + 0.05 * location
 ```
 
-`python -m scripts.ingest_adzuna` is equivalent.
+Hybrid weights renormalize when a preference is omitted. These weights are DESIGN defaults, not a tuned production optimum.
 
-The CLI is thin. Fetching, normalization, dedupe, upsert, and metrics live in `app/ingestion/`.
+## Evaluation
 
-### Example workflow
+v1 fixture: **8 synthetic profiles × 32 jobs = 256 judgments**. Directional benchmark; not statistically significant.
+
+Held-out test (3 profiles):
+
+| Method | P@5 | R@10 | NDCG@10 | MRR |
+|---|---|---|---|---|
+| Skill overlap | 0.467 | 0.589 | 0.586 | 0.778 |
+| Pairwise TF-IDF | 0.533 | 0.783 | 0.757 | 1.000 |
+| hashing-v1 (lexical) | 0.533 | 0.633 | 0.691 | 1.000 |
+| Hybrid (DESIGN + hashing-v1) | 0.600 | 0.933 | 0.852 | 1.000 |
+
+On validation, TF-IDF NDCG@10 was 0.685 vs hybrid 0.677. Sentence-transformer evaluation was **not run**. Production weights were not changed. See `/evaluation.html` and `docs/EVALUATION.md`.
+
+## Data pipeline
 
 ```bash
-cp .env.example .env          # set DATABASE_URL and Adzuna keys
 python scripts/migrate.py
 python scripts/sync_skills.py
 python scripts/ingest_adzuna.py --query "data engineer" --pages 2
 python scripts/enrich_job_skills.py --only-missing
 python scripts/generate_embeddings.py --only-missing
-uvicorn app.main:app --reload
 ```
 
-Then open http://127.0.0.1:8000 and upload a résumé.
-
-### How idempotency works
-
-1. Look up an existing row by `(source, source_job_id)`, else `(source, source_url)`, else `(source, content_hash)` when both identity keys are missing.
-2. New identity → insert (`first_seen_at = last_seen_at = now`).
-3. Same identity and same `content_hash` → update `last_seen_at` only (unchanged).
-4. Same identity and different `content_hash` → update mutable fields, hash, `last_seen_at`, `updated_at`. Preserve `first_seen_at`.
-
-Company + title alone never merges two jobs.
-
-Re-running the same mocked or live snapshot should insert once, then report unchanged rows, not duplicates.
-
----
+Adzuna is the only source. One request is not the whole market. Jobs are not auto-deactivated when missing from a single page.
 
 ## Skill intelligence
 
-The taxonomy file `data/taxonomy/skills.yml` is the source of truth (~160 technical skills, aliases, categories). Extraction is deterministic: boundary-aware, alias-aware, canonicalized. Short tokens such as `R` use an isolated-letter rule. `Go` and `C` are not matched as English words.
+`data/taxonomy/skills.yml` is the source of truth (~160 technical skills). Extraction is deterministic and alias-aware. `sql` inside `postgresql` does not count as SQL.
 
-```bash
-python scripts/sync_skills.py              # upsert skills/aliases; does not delete extras
-python scripts/enrich_job_skills.py --all  # replace job_skills per job
-python scripts/enrich_job_skills.py --only-missing --limit 100
-python scripts/enrich_job_skills.py --job-id 12
-```
+## API
 
-Ingestion stores jobs first, then attempts enrichment, then embeddings. A skill-enrichment or embedding failure does not fail the ingest run. Re-enrichment replaces stale links (Python+SQL → Python+Spark drops SQL). Embeddings are regenerated when the embedding text hash or model name changes.
+Documented in `/docs`. Implemented endpoints include:
 
-```bash
-python scripts/generate_embeddings.py --all
-python scripts/generate_embeddings.py --only-missing
-python scripts/generate_embeddings.py --job-id 12
-```
-
-The default embedding provider is deterministic hashed n-grams (`hashing-v1`). That keeps tests and local setup free of model downloads. It is lexical hashing retrieval, not semantic retrieval. For sentence-transformer embeddings:
-
-```bash
-pip install sentence-transformers
-# EMBEDDING_PROVIDER=sentence-transformers
-```
-
-Analytics use SQL aggregates, not a full table load in Python:
-
+- `GET /health`
+- `GET /jobs`, `GET /jobs/{id}`
 - `GET /api/v1/skills`
-- `GET /api/v1/analytics/skills?title=Data%20Engineer&location=Bengaluru&limit=25`
+- `GET /api/v1/ranking/status`
+- `GET /api/v1/analytics/overview`
+- `GET /api/v1/analytics/skills`
+- `GET /api/v1/analytics/categories`
+- `GET /api/v1/analytics/experience`
+- `GET /api/v1/analytics/locations`
+- `GET /api/v1/analytics/companies`
+- `GET /api/v1/analytics/freshness`
+- `POST /upload-resume`
+- `POST /api/v1/matches`, `POST /api/v1/matches/upload`
 
-Title and location filters are conservative `ILIKE` matches, not a job-family classifier.
-
----
-
-## Run the API
+## Run locally
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # DATABASE_URL and optional Adzuna keys
+python scripts/migrate.py
+python scripts/sync_skills.py
 uvicorn app.main:app --reload
 ```
 
-`uvicorn main:app --reload` also works.
-
-- API: http://127.0.0.1:8000
-- Docs: http://127.0.0.1:8000/docs
-- Health: http://127.0.0.1:8000/health
-
----
+Python 3.10+ recommended. PostgreSQL needs pgvector for stored embeddings. Charts use Chart.js 4.4.1 from jsDelivr.
 
 ## Tests
 
@@ -256,113 +131,32 @@ uvicorn app.main:app --reload
 pytest
 ```
 
-Unit tests mock Adzuna and do not need PostgreSQL.
+Repository tests skip without `TEST_DATABASE_URL` or a ready Docker daemon.
 
-Repository and pipeline tests need PostgreSQL. They use `TEST_DATABASE_URL` if set, otherwise they try to start a temporary `postgres:16-alpine` Docker container on port 55432. If neither is available those tests are skipped.
+## Limitations
 
-```bash
-TEST_DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/job_market_test pytest
-```
+- hashing-v1 is not a semantic model.
+- Hybrid defaults are unevaluated for production changes.
+- Location strings are not geocoded.
+- Experience is not inferred from prose.
+- No historical skill-growth claims.
+- No Docker Compose app stack or CI yet.
+- A past commit leaked a database password in git history; rotate it outside git.
 
-Do not point tests at a production database.
+## Roadmap
 
----
+Possible later work: historical trends, a larger labeled set, optional sentence-transformer evaluation, Docker/CI. Not in this phase: LLM ranking, new job boards, Kafka/Redis.
 
-## API
-
-### `GET /health`
-
-```json
-{"status": "ok"}
-```
-
-### `GET /jobs`
-
-Lists active stored jobs. Requires `DATABASE_URL`.
-
-### `POST /upload-resume`
-
-Multipart field: `file` (PDF). TF-IDF lexical baseline. Response includes `match_score`, `skill_score`, `hybrid_score`, `skills`, `matched_skills`, and `missing_skills` as **canonical** names.
-
-### `POST /api/v1/matches`
-
-JSON hybrid ranking. Example body:
-
-```json
-{
-  "resume_text": "python sql spark",
-  "preferred_location": "Bengaluru",
-  "preferred_experience": "mid",
-  "limit": 20
-}
-```
-
-Response includes `hybrid_score`, `components` (`semantic`, `skills`, `experience`, `recency`, `location`), matched/missing canonical skills, the embedding model, retrieval mode (`pgvector` or `in_memory_fallback`), and the weights actually used. `POST /api/v1/matches/upload` accepts a PDF plus the same optional form fields.
-
-### `GET /api/v1/skills`
-
-Taxonomy list. Falls back to the YAML file if the database is empty or unavailable.
-
-### `GET /api/v1/analytics/skills`
-
-Skill demand among active jobs. Optional `title`, `location`, `limit`. Requires PostgreSQL.
-
-### `GET /jobs/{id}`
-
-Job detail with canonical skills when available.
-
----
-
-## Ranking evaluation
-
-Offline fixture: 8 synthetic profiles × 32 jobs = **256** independent labels (`data/evaluation/v1`). Profile-level split (5 validation / 3 test). Relevance ≥ 2 counts as relevant. Details: `docs/EVALUATION.md`.
-
-```bash
-python scripts/evaluate_ranking.py --dataset data/evaluation/v1 --split test
-```
-
-On the v1 **held-out test** set (3 profiles), DESIGN-weight hybrid ranking with hashing-v1 embeddings reached NDCG@10 **0.852** versus **0.757** for pairwise TF-IDF, **0.691** for lexical hashing-v1, and **0.586** for skill overlap. On the **validation** set (5 profiles), pairwise TF-IDF was ahead (NDCG@10 **0.685** vs hybrid **0.677**). That disagreement is why these numbers are directional, not a claim of statistically significant improvement.
-
-sentence-transformer semantic evaluation was **not run** (package not installed). Live pgvector retrieval was **not run**. hashing-v1 is lexical hashing retrieval, not semantic retrieval. Production weights were not changed.
-
----
-
-## Known limitations
-
-- Default hashing-v1 vectors are lexical hashing, not sentence-transformer semantics.
-- Hybrid DESIGN weights remain an un-evaluated production default. The v1 benchmark is too small to justify changing them.
-- Jobs with no extracted skills receive `skill_score = 0`.
-- Jobs with no extracted skills receive `skill_score = 0`.
-- Experience uses explicit normalized levels only; years are not inferred from prose.
-- Location and experience affect ranking only when the user supplies a preference.
-- Missing `posted_at` uses a documented recency fallback of `0.5`.
-- Title/location analytics filters are substring `ILIKE`, not role classification.
-- Trend / “fastest growing” metrics are not claimed; history is still thin.
-- Adzuna is the only source. One request is not a complete snapshot of the market.
-- Automatic job deactivation is not implemented.
-- A previous version of this repository committed a plaintext database password. Rotate it outside git.
-
----
-
-## Project documents
+## Documents
 
 | Document | Role |
 |---|---|
 | `docs/PRD.md` | Product requirements |
 | `docs/DESIGN.md` | Target architecture |
-| `docs/PHASE_0_AUDIT.md` | Pre-refactor audit of the MVP |
-| `docs/PHASE_1_SUMMARY.md` | Modular foundation |
-| `docs/PHASE_2_SUMMARY.md` | Ingestion pipeline |
-| `docs/PHASE_3_SUMMARY.md` | Skill taxonomy and enrichment |
-| `docs/PHASE_4_SUMMARY.md` | Embeddings, retrieval, hybrid ranking |
-| `docs/EVALUATION_GUIDE.md` | Relevance label definitions |
-| `docs/EVALUATION.md` | v1 ranking evaluation report |
-| `docs/PHASE_5_SUMMARY.md` | Offline evaluation framework |
-
----
+| `docs/METRICS.md` | Dashboard metric definitions |
+| `docs/EVALUATION.md` | Ranking evaluation report |
+| `docs/PHASE_6_SUMMARY.md` | This phase |
 
 ## Author
 
-**Mohnish Gurramkonda**
-
-GitHub: [MohnishOnGitHub](https://github.com/MohnishOnGitHub)
+**Mohnish Gurramkonda** · [MohnishOnGitHub](https://github.com/MohnishOnGitHub)

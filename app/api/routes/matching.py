@@ -10,7 +10,12 @@ from app.services.resume_parser import parse_resume
 router = APIRouter()
 
 
-@router.post("/upload-resume", response_model=MatchResponse)
+@router.post(
+    "/upload-resume",
+    response_model=MatchResponse,
+    summary="Pairwise TF-IDF baseline matching",
+    tags=["matching"],
+)
 async def upload_resume(
     file: UploadFile = File(...),
     repo: JobRepository = Depends(get_job_repository),

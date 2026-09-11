@@ -5,6 +5,6 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-@router.get("/health")
+@router.get("/health", summary="Liveness check")
 def health() -> dict:
     return {"status": "ok"}

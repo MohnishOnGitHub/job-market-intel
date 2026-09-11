@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Résumé matching — Job Market Intel</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="/js/api.js" defer></script>
+  <script src="/js/match.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">
+        <strong>Job Market Intel</strong>
+        <span>Skill demand and résumé matching over ingested job postings</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/">Market</a>
+        <a href="/match.html" aria-current="page">Résumé match</a>
+        <a href="/evaluation.html">Evaluation</a>
+        <a href="/docs">API docs</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page">
+    <h1>Résumé matching</h1>
+    <p class="lede">
+      Upload a PDF. Choose the pairwise TF-IDF baseline or the structured hybrid ranker.
+      The overall score is a <strong>match score</strong>, not a chance of being hired.
+      The résumé is parsed in memory and is not stored.
+    </p>
+    <form id="match-form" class="panel">
+      <label>Résumé PDF
+        <input name="resume" type="file" accept="application/pdf,.pdf" required>
+      </label>
+      <fieldset>
+        <legend>Ranking mode</legend>
+        <label><input type="radio" name="mode" value="tfidf" checked> Pairwise TF-IDF baseline</label>
+        <label><input type="radio" name="mode" value="hybrid"> Vector + structured hybrid</label>
+      </fieldset>
+      <div id="hybrid-fields">
+        <p class="meta">
+          Hybrid uses the configured embedding provider. Default hashing-v1 is
+          <strong>lexical hashing retrieval</strong>, shown as “Lexical vector + structured hybrid”.
+          Sentence-transformers, if configured, is shown as “Semantic + structured hybrid”.
+        </p>
+        <div class="filters">
+          <label>Preferred location
+            <input name="preferred_location" type="text" placeholder="Bengaluru or Remote">
+          </label>
+          <label>Preferred experience
+            <select name="preferred_experience">
+              <option value="">Not specified (N/A)</option>
+              <option value="internship">internship</option>
+              <option value="entry">entry</option>
+              <option value="junior">junior</option>
+              <option value="mid">mid</option>
+              <option value="senior">senior</option>
+              <option value="lead">lead</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <label>Result limit
+        <select name="limit">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="40">40</option>
+        </select>
+      </label>
+      <p><button type="submit">Rank jobs</button></p>
+    </form>
+    <div id="match-status" class="status empty" hidden></div>
+    <div id="match-results"></div>
+    <dialog id="job-dialog" class="dialog-backdrop">
+      <div class="dialog-panel">
+        <div id="job-dialog-body"></div>
+        <p><button type="button" id="close-dialog" class="secondary">Close</button></p>
+      </div>
+    </dialog>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">Unused hybrid signals (no location or experience preference) display as N/A, not 0.</div>
+  </footer>
+</body>
+</html>

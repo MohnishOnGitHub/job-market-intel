@@ -1,244 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AI Job Matcher</title>
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        body {
-            font-family: Arial;
-            background: linear-gradient(135deg, #0f172a, #020617);
-            color: white;
-            padding: 40px;
-        }
-
-        .title {
-            text-align: center;
-            font-size: 40px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: auto;
-            text-align: center;
-        }
-
-        input, button {
-            margin: 10px;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-        }
-
-        button {
-            background: #22c55e;
-            color: white;
-            cursor: pointer;
-        }
-
-        .job {
-            background: #1e293b;
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: left;
-        }
-
-        .skill-tag {
-            background: #334155;
-            padding: 5px 10px;
-            border-radius: 20px;
-            margin: 3px;
-            display: inline-block;
-            font-size: 12px;
-        }
-
-        .bar {
-            height: 8px;
-            background: #0f172a;
-            border-radius: 5px;
-        }
-
-        .bar-fill {
-            height: 100%;
-            background: #22c55e;
-            border-radius: 5px;
-        }
-
-        /* Modal */
-        #modal {
-            display:none;
-            position:fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
-            background:rgba(0,0,0,0.7);
-            justify-content:center;
-            align-items:center;
-        }
-
-        #modal-content {
-            background:#1e293b;
-            padding:30px;
-            border-radius:12px;
-            width:400px;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market intelligence — Job Market Intel</title>
+  <link rel="stylesheet" href="/css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="/js/api.js" defer></script>
+  <script src="/js/market.js" defer></script>
 </head>
-
 <body>
-
-<h1 class="title">🚀 AI Job Matcher</h1>
-
-<div class="container">
-    <input type="file" id="resume">
-    <br>
-    <button onclick="uploadResume()">Find Jobs</button>
-
-    <div id="results"></div>
-
-    <!-- 📊 Chart -->
-    <canvas id="chart" style="margin-top:40px;"></canvas>
-</div>
-
-<!-- 📄 Modal -->
-<div id="modal">
-    <div id="modal-content"></div>
-</div>
-
-<script>
-
-let matchChart = null;
-
-function scoreMessage(data) {
-    if (typeof data.detail === "string") {
-        return data.detail;
-    }
-    if (Array.isArray(data.detail)) {
-        return "The upload could not be processed.";
-    }
-    return "Matching failed.";
-}
-
-async function uploadResume() {
-    const fileInput = document.getElementById("resume");
-    const file = fileInput.files[0];
-
-    if (!file) {
-        alert("Upload resume first");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch("http://127.0.0.1:8000/upload-resume", {
-        method: "POST",
-        body: formData
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.jobs) {
-        alert(scoreMessage(data));
-        return;
-    }
-
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = "";
-
-    data.jobs.forEach(job => {
-        const div = document.createElement("div");
-        div.className = "job";
-
-        const skillsHTML = (job.skills || []).map(s =>
-            `<span class="skill-tag">${s}</span>`
-        ).join("");
-
-        const matchedHTML = (job.matched_skills || []).length > 0
-            ? `<p><b>Matched:</b> ${job.matched_skills.join(", ")}</p>`
-            : "";
-
-        const missingHTML = (job.missing_skills || []).length > 0
-            ? `<p style="color:#facc15;"><b>Improve:</b> ${job.missing_skills.join(", ")}</p>`
-            : "";
-
-        const hybrid = job.hybrid_score;
-
-        div.innerHTML = `
-            <h3>${job.title}</h3>
-            <p><b>${job.company}</b> • ${job.location}</p>
-
-            <p><b>Hybrid Score:</b> ${hybrid}</p>
-            <div class="bar">
-                <div class="bar-fill" style="width:${hybrid * 100}%"></div>
-            </div>
-
-            <p>TF-IDF: ${job.match_score}</p>
-            <p>Skill Score: ${job.skill_score}</p>
-
-            <div>${skillsHTML}</div>
-
-            ${matchedHTML}
-            ${missingHTML}
-
-            <button onclick='viewJob(${JSON.stringify(job)})'>View Details</button>
-        `;
-
-        resultsDiv.appendChild(div);
-    });
-
-    const labels = data.jobs.map(job => job.title);
-    const scores = data.jobs.map(job => job.hybrid_score);
-
-    const ctx = document.getElementById("chart").getContext("2d");
-    if (matchChart) {
-        matchChart.destroy();
-    }
-
-    matchChart = new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Hybrid Score",
-                data: scores
-            }]
-        }
-    });
-}
-
-function viewJob(job) {
-    const modal = document.getElementById("modal");
-    const content = document.getElementById("modal-content");
-    const matched = (job.matched_skills || []).join(", ");
-    const missing = (job.missing_skills || []).join(", ");
-
-    content.innerHTML = `
-        <h2>${job.title}</h2>
-        <p><b>Company:</b> ${job.company}</p>
-        <p><b>Location:</b> ${job.location}</p>
-        <p><b>Hybrid Score:</b> ${job.hybrid_score}</p>
-        <p><b>TF-IDF:</b> ${job.match_score}</p>
-        <p><b>Skill Score:</b> ${job.skill_score}</p>
-        <p><b>Skills:</b> ${(job.skills || []).join(", ")}</p>
-        <p><b>Matched:</b> ${matched}</p>
-        <p style="color:#facc15;"><b>Improve:</b> ${missing}</p>
-        <br>
-        <button onclick="closeModal()">Close</button>
-    `;
-
-    modal.style.display = "flex";
-}
-
-function closeModal() {
-    document.getElementById("modal").style.display = "none";
-}
-
-</script>
-
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">
+        <strong>Job Market Intel</strong>
+        <span>Skill demand and résumé matching over ingested job postings</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/" aria-current="page">Market</a>
+        <a href="/match.html">Résumé match</a>
+        <a href="/evaluation.html">Evaluation</a>
+        <a href="/docs">API docs</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page">
+    <h1>Market intelligence</h1>
+    <p class="lede">
+      Counts come from active jobs in PostgreSQL. Title and location filters are conservative
+      <code>ILIKE</code> matches. Locations are stored strings, not geocoded regions.
+      This page does not claim skill growth over time.
+    </p>
+    <form id="filters" class="filters">
+      <label>Title contains
+        <input name="title" type="search" placeholder="Data Engineer">
+      </label>
+      <label>Location contains
+        <input name="location" type="search" placeholder="Bengaluru">
+      </label>
+      <label>Experience level
+        <select name="experience">
+          <option value="">Any / all</option>
+          <option value="internship">internship</option>
+          <option value="entry">entry</option>
+          <option value="junior">junior</option>
+          <option value="mid">mid</option>
+          <option value="senior">senior</option>
+          <option value="lead">lead</option>
+          <option value="unknown">unknown</option>
+        </select>
+      </label>
+      <label>Row limit
+        <select name="limit">
+          <option value="10">10</option>
+          <option value="15" selected>15</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+      </label>
+      <button type="submit">Apply filters</button>
+    </form>
+    <div id="market-status" class="status info" role="status">Loading market data…</div>
+    <section aria-labelledby="overview-heading">
+      <h2 id="overview-heading">Overview</h2>
+      <div id="overview" class="cards"></div>
+    </section>
+    <section class="panel" aria-labelledby="skills-heading">
+      <h2 id="skills-heading">Skill demand</h2>
+      <p class="meta">Job share = jobs containing the skill / filtered active jobs. Chart library: Chart.js 4.4.1.</p>
+      <div class="chart-wrap"><canvas id="skills-chart" aria-label="Top skills by job count"></canvas></div>
+      <table>
+        <thead>
+          <tr><th scope="col">Skill</th><th scope="col">Category</th><th scope="col">Job count</th><th scope="col">Job share</th></tr>
+        </thead>
+        <tbody id="skills-body"></tbody>
+      </table>
+    </section>
+    <section class="panel" aria-labelledby="categories-heading">
+      <h2 id="categories-heading">Demand by skill category</h2>
+      <p class="meta">A job is counted once if it has at least one canonical skill in that category.</p>
+      <table>
+        <thead>
+          <tr><th scope="col">Category</th><th scope="col">Jobs</th><th scope="col">Share of filtered jobs</th></tr>
+        </thead>
+        <tbody id="categories-body"></tbody>
+      </table>
+    </section>
+    <section class="panel" aria-labelledby="experience-heading">
+      <h2 id="experience-heading">Experience mix</h2>
+      <p class="meta">Uses stored <code>experience_level</code> only. Missing values stay <code>unknown</code>.</p>
+      <div class="chart-wrap"><canvas id="experience-chart" aria-label="Jobs by experience level"></canvas></div>
+      <table>
+        <thead><tr><th scope="col">Experience</th><th scope="col">Jobs</th></tr></thead>
+        <tbody id="experience-body"></tbody>
+      </table>
+    </section>
+    <section class="panel" aria-labelledby="locations-heading">
+      <h2 id="locations-heading">Top locations</h2>
+      <div class="chart-wrap"><canvas id="locations-chart" aria-label="Jobs by location string"></canvas></div>
+      <table>
+        <thead><tr><th scope="col">Location</th><th scope="col">Jobs</th></tr></thead>
+        <tbody id="locations-body"></tbody>
+      </table>
+    </section>
+    <section class="panel" aria-labelledby="companies-heading">
+      <h2 id="companies-heading">Top companies</h2>
+      <p class="meta">Blank company names are excluded from the table.</p>
+      <table>
+        <thead><tr><th scope="col">Company</th><th scope="col">Active jobs</th></tr></thead>
+        <tbody id="companies-body"></tbody>
+      </table>
+    </section>
+    <section class="panel" aria-labelledby="freshness-heading">
+      <h2 id="freshness-heading">Posting age</h2>
+      <p class="meta">Buckets use <code>posted_at</code> only. This is not a forecast.</p>
+      <div class="chart-wrap"><canvas id="freshness-chart" aria-label="Jobs by posting age"></canvas></div>
+      <table>
+        <thead><tr><th scope="col">Bucket</th><th scope="col">Jobs</th></tr></thead>
+        <tbody id="freshness-body"></tbody>
+      </table>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      Job data is ingested from Adzuna when configured. Metric definitions: see docs/METRICS.md.
+      hashing-v1 is lexical hashing retrieval, not semantic embeddings.
+    </div>
+  </footer>
 </body>
 </html>

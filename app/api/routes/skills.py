@@ -9,7 +9,12 @@ from app.services.taxonomy import load_skill_taxonomy
 router = APIRouter()
 
 
-@router.get("/skills", response_model=SkillListResponse)
+@router.get(
+    "/skills",
+    response_model=SkillListResponse,
+    summary="Canonical skill taxonomy",
+    tags=["skills"],
+)
 def list_skills(repo: SkillRepository = Depends(get_skill_repository)) -> SkillListResponse:
     try:
         rows = repo.list_taxonomy()

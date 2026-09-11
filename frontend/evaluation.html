@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ranking evaluation — Job Market Intel</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">
+        <strong>Job Market Intel</strong>
+        <span>Skill demand and résumé matching over ingested job postings</span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/">Market</a>
+        <a href="/match.html">Résumé match</a>
+        <a href="/evaluation.html" aria-current="page">Evaluation</a>
+        <a href="/docs">API docs</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page">
+    <h1>Phase 5 ranking evaluation</h1>
+    <p class="lede">
+      Directional benchmark; not statistically significant. These are measured fixture results,
+      not live API scores. Sentence-transformer metrics are omitted because that evaluation was not run.
+    </p>
+    <section class="panel">
+      <h2>Dataset</h2>
+      <ul>
+        <li>8 synthetic profiles (not real applicants)</li>
+        <li>32 fixture jobs</li>
+        <li>256 relevance judgments</li>
+        <li>Profile-level split: 5 validation / 3 held-out test</li>
+        <li>Relevant means label ≥ 2</li>
+      </ul>
+    </section>
+    <section class="panel">
+      <h2>Held-out test</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Method</th>
+            <th scope="col">P@5</th>
+            <th scope="col">R@10</th>
+            <th scope="col">NDCG@10</th>
+            <th scope="col">MRR</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Skill overlap</td><td>0.467</td><td>0.589</td><td>0.586</td><td>0.778</td></tr>
+          <tr><td>Pairwise TF-IDF baseline</td><td>0.533</td><td>0.783</td><td>0.757</td><td>1.000</td></tr>
+          <tr><td>hashing-v1 (lexical hashing retrieval)</td><td>0.533</td><td>0.633</td><td>0.691</td><td>1.000</td></tr>
+          <tr><td>Hybrid (DESIGN weights + hashing-v1)</td><td>0.600</td><td>0.933</td><td>0.852</td><td>1.000</td></tr>
+        </tbody>
+      </table>
+      <p class="meta">On validation (5 profiles), pairwise TF-IDF NDCG@10 was 0.685 and hybrid was 0.677. No production weights were changed from this study.</p>
+    </section>
+    <section class="panel">
+      <h2>Terminology</h2>
+      <ul>
+        <li><strong>TF-IDF</strong> — pairwise lexical baseline</li>
+        <li><strong>hashing-v1</strong> — lexical hashing retrieval, not semantic embeddings</li>
+        <li><strong>hybrid</strong> — structured weighted ranker</li>
+        <li><strong>sentence-transformers</strong> — semantic embeddings (not evaluated here)</li>
+      </ul>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">Source: docs/EVALUATION.md and artifacts/evaluation/results.json</div>
+  </footer>
+</body>
+</html>

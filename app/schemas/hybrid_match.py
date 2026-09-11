@@ -40,3 +40,5 @@ class HybridMatchResponse(BaseModel):
     retrieval: str
     candidate_count: int
     weights: Dict[str, float]
+    embedding_kind: str = "lexical_hashing"
+    ranking_label: str = "Lexical vector + structured hybrid"

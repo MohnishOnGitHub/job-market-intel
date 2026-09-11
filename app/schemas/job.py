@@ -31,3 +31,20 @@ class JobListItem(BaseModel):
 
 class JobListResponse(BaseModel):
     jobs: List[JobListItem]
+
+
+class JobDetail(BaseModel):
+    id: int
+    title: Optional[str] = None
+    company: Optional[str] = None
+    location: Optional[str] = None
+    description: str = ""
+    source: Optional[str] = None
+    source_url: Optional[str] = None
+    employment_type: Optional[str] = None
+    experience_level: Optional[str] = None
+    salary_min: Optional[float] = None
+    salary_max: Optional[float] = None
+    salary_currency: Optional[str] = None
+    posted_at: Optional[datetime] = None
+    skills: List[JobSkill] = []

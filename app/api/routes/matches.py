@@ -17,7 +17,12 @@ from app.services.resume_parser import parse_resume
 router = APIRouter()
 
 
-@router.post("/matches", response_model=HybridMatchResponse)
+@router.post(
+    "/matches",
+    response_model=HybridMatchResponse,
+    summary="Hybrid ranking from résumé text",
+    tags=["matching"],
+)
 def create_matches(
     payload: HybridMatchRequest,
     job_repo: JobRepository = Depends(get_job_repository),
@@ -37,7 +42,12 @@ def create_matches(
     )
 
 
-@router.post("/matches/upload", response_model=HybridMatchResponse)
+@router.post(
+    "/matches/upload",
+    response_model=HybridMatchResponse,
+    summary="Hybrid ranking from uploaded PDF",
+    tags=["matching"],
+)
 async def upload_matches(
     file: UploadFile = File(...),
     preferred_location: Optional[str] = Form(default=None),

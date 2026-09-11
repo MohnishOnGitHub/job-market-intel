@@ -19,6 +19,7 @@ from app.api.routes.jobs import router as jobs_router
 from app.api.routes.matches import router as matches_router
 from app.api.routes.matching import router as matching_router
 from app.api.routes.skills import router as skills_router
+from app.api.routes.status import router as status_router
 from app.core.config import get_settings
 from app.core.exceptions import AppError
 
@@ -39,8 +40,14 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="Job Market Intel",
-        description="Résumé-to-job matching with a TF-IDF baseline and explainable hybrid ranking.",
-        version="0.1.0",
+        description=(
+            "Job-market intelligence and résumé matching. "
+            "Analytics use SQL aggregates over active PostgreSQL jobs. "
+            "Matching exposes a pairwise TF-IDF baseline (`POST /upload-resume`) "
+            "and a structured hybrid ranker (`POST /api/v1/matches`). "
+            "hashing-v1 is lexical hashing retrieval, not semantic embeddings."
+        ),
+        version="0.6.0",
     )
 
     app.add_middleware(
@@ -71,6 +78,7 @@ def create_app() -> FastAPI:
     app.include_router(jobs_router)
     app.include_router(matching_router)
     app.include_router(skills_router, prefix="/api/v1")
+    app.include_router(status_router, prefix="/api/v1")
     app.include_router(analytics_router, prefix="/api/v1")
     app.include_router(matches_router, prefix="/api/v1")
 

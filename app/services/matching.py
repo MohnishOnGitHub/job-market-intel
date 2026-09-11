@@ -19,6 +19,7 @@ from app.services.hybrid_ranking import (
     normalize_experience_level,
     rank_hybrid_jobs,
 )
+from app.services.ranking_labels import embedding_kind, hybrid_ranking_label
 
 RETRIEVAL_PGVECTOR = "pgvector"
 RETRIEVAL_IN_MEMORY = "in_memory_fallback"
@@ -101,4 +102,6 @@ def match_resume_hybrid(
         retrieval=retrieval,
         candidate_count=len(candidates),
         weights=weights.as_dict(),
+        embedding_kind=embedding_kind(embedder.name),
+        ranking_label=hybrid_ranking_label(embedder.name),
     )
